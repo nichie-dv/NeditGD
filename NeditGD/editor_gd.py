@@ -1,38 +1,88 @@
 from __future__ import annotations
 from NeditGD.saveload import *
 from NeditGD import Object
-
+import asyncio, websocket, json, time, threading
 
 WATERMARK_TEXT = [
     Object(id=914, x=-165, y=-15, scale=0.75,
-           text="Made with Nedit"),
+           text="Made with Nedit", groups = [9999]),
     Object(id=914, x=-213, y=-33, scale=0.5,
-           text="by Nemo2510"),
+           text="by Nemo2510", groups = [9999]),
     Object(id=914, x=-135, y=-45, scale=0.2,
            text="(You can remove this watermark, "
-           "but we'd appreciate it if you didn't)")
+           "but we'd appreciate it if you didn't)", groups = [9999])
 ]
 
 # The class that stores all loaded objects and handles
 # interactions with the SaveLoad system for the user
 class Editor():
-    def __init__(self):
+    def __init__(self, live_edit):
         self.__root = None
         self.__level_node = None
         self.__level_string = None
         self.__markers = None
         self.head = None
         self.objects = None
+        
+        # WS properties
+        self.live_edit = live_edit
+        self.ws_connected = bool()
+        self.ws = websocket.WebSocketApp(
+            "ws://127.0.0.1:1313",
+            on_open=self.ws_on_connect,
+            on_close=self.ws_disconnect,
+            on_pong=self.ws_response
+        )
+        # Starts thread early to minimize wait time
+        # which is already low
+        if live_edit:
+            self.ws_start_thread()
+            
+     # WS methods
+     #-----------
+    def ws_response(self, ws, message):
+        print(f"[WSL]: {message}") 
+        
+    def ws_on_connect(self, ws):
+        self.ws_connected = True
+        print("[WSL]: WebSocket connected")
+        
+    def ws_start_thread(self):
+        self.thread = threading.Thread(target=self.ws.run_forever)
+        self.thread.daemon = True
+        self.thread.start()
+        while not self.ws_connected:
+            time.sleep(0.1)
+
+    def ws_disconnect(self, ws, close_status_code, close_msg):
+        self.ws_connected = False
+        if close_msg != None:
+            print(f"[WSL]: WebSocket disconnected: {close_msg}")
+        else:
+            print("[WSL]: WebSocket disconnected")
+
+    def ws_error(self, error):
+        print(f"[WSL]: Error |{error}|")
+
+    #-----------
 
     # Create an editor object that automatically loads
     # the contents of the current level
+
+    # First, it is determined whether or not
+    # save file editing is even necessary 
     @classmethod
-    def load_current_level(cls, remove_scripted: bool=True) -> Editor:
-        editor = Editor()
-        editor.load_level_data()
-        if remove_scripted:
-            editor.remove_scripted_objects()
-        editor.refresh_markers()
+    def load_current_level(cls, remove_scripted: bool=True, live_edit=False) -> Editor:  
+        editor = Editor(live_edit)
+        if live_edit:
+            print("[WSL]: Using current level")
+            editor.objects = []
+            editor.head = []
+        else:
+            editor.load_level_data()
+            if remove_scripted:
+                editor.remove_scripted_objects()
+            editor.refresh_markers()
         return editor
     
 
@@ -46,11 +96,12 @@ class Editor():
     
     # Refresh the markers in the level
     def refresh_markers(self):
-        from Nextra.marker_loader import MarkerLoader
+        from NeditGD.Nextra.marker_loader import MarkerLoader
         self.__markers = MarkerLoader(self)
    
     # Load the editor data
     def load_level_data(self, data: str = None) -> None:
+        
         self.__root = read_gamesave_xml()
         self.__level_node = get_working_level_node(self.__root)
         if not self.__level_node.text:
@@ -125,16 +176,59 @@ class Editor():
         return res
 
     # Write the editor object list to the current level file
+
+    # If live editor is enabled, writing to save file is skipped
+    # and objects are added directly instead
     def save_changes(self):
-        self.add_objects(WATERMARK_TEXT)
+        if not self.live_edit:
+            self.add_objects(WATERMARK_TEXT)
+            save_string = self.get_robtop_string()
+            encrypted = encrypt_level_string(save_string.encode())
+            set_level_data(self.__level_node, encrypted)
+            xml_str = ET.tostring(self.__root)
+            encryptGamesave(xml_str)
+            print('[Nedit]: Changes saved!')
+        elif self.ws_connected and self.live_edit:
+            self.ws_clean_level()   
+            self.ws_edit_level()
+            self.ws_add_objects(WATERMARK_TEXT)
+            print('[Nedit]: Changes made!')
+            self.ws.close()
+            self.thread.join()
+            
+    # Add objects in real time using WSliveEditor
+    def ws_edit_level(self):
+        self.ws_clean_level()
+        for x in range(0, len(self.objects)):
+            
+            self.ws_add_object(self.objects[x])
+        print(f'[WSL]: Added {len(self.objects)} objects to editor')
+        
+    # Clean all 9999 grouped objects first
+    def ws_clean_level(self):
+        packet = {
+            "action": "REMOVE_OBJECTS",
+            "group": 9999
+        }
+        self.ws.send(json.dumps(packet))
+    
+    # Add a singular object
+    def ws_add_object(self, object):  
+            packet = {
+                "action": "ADD_OBJECTS",
+                "objects": object.to_robtop()
+            }  
+            self.ws.send(json.dumps(packet))
 
-        save_string = self.get_robtop_string()
-        encrypted = encrypt_level_string(save_string.encode())
-        set_level_data(self.__level_node, encrypted)
+    # Add a list of objects
+    def ws_add_objects(self, objects):
+            for obj in objects: 
+                packet = {
+                    "action": "ADD_OBJECTS",
+                    "objects": obj.to_robtop()
+                }  
+                self.ws.send(json.dumps(packet))
 
-        xml_str = ET.tostring(self.__root)
-        encryptGamesave(xml_str)
-        print('[Nedit]: Changes saved!')
 
 
     # Get the string representation of the current level
@@ -194,7 +288,7 @@ class Editor():
 
     # Get the used groups in an easy-to-interact way
     def get_used_group_pool(self):
-        from Nextra.group_pool import GroupPool
+        from NeditGD.Nextra.group_pool import GroupPool
         return GroupPool(Editor.get_used_groups(self.objects))
     
     # Check if a given group pool overlaps with the editor's groups
