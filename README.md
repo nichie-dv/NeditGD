@@ -17,7 +17,7 @@
  Note that Git will be updated more frequently with experimental changes.
 
 ## Loading the level editor
- This fork ofNedit can use the WSLiveEditor mod (which can be found here https://github.com/iAndyHD3/WSLiveEditor)
+ This fork ofNedit can use the WSLiveEditor mod (which can be found here [WSLiveEditor](https://github.com/iAndyHD3/WSLiveEditor))
  to make changes at runtime as well as editing the savefile.
  To use WSLiveEditor, all you have to do is change `live_edit` to `True` on `Editor.load_current_level()`:
  
