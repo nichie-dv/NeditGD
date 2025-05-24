@@ -17,13 +17,28 @@
  Note that Git will be updated more frequently with experimental changes.
 
 ## Loading the level editor
+ This fork ofNedit can use the WSLiveEditor mod to make changes at runtime as well as editing the savefile. To use WSLiveEditor, all you have to do is change `live_edit` to `True` on `Editor.load_current_level()`:
+ 
 
- For now, Nedit can only read the level at the top of the created levels list ('current level'). If you want to edit a level, push it to the top of your levels list in Geometry Dash first.
- The Editor class handles loading and saving the data automatically. You only need to call the level loader, add your objects, and save the changes:
+```python
+# Load the current open level using Editor.load_current_level(live_edit=True)
+editor = Editor.load_current_level(live_edit=True)
+
+# Make all the necessary changes (add/delete objects)
+editor.add_object(
+    Object(id=1, x=75, y=-15, groups=[12, 42], scale=5))
+
+# Make all the necessary changes with the level still open (add/delete objects)
+editor.save_changes()
+```
+
+
+To edit the last opened level, push it to the top of your levels list in Geometry Dash first.
+The Editor class handles loading and saving the data automatically. You only need to call the level loader, add your objects, and save the changes:
 
 ```python
 # Load the most recent level using Editor.load_current_level()
-editor = Editor.load_current_level()
+editor = Editor.load_current_level(live_edit=True)
 
 # Make all the necessary changes (add/delete objects)
 editor.add_object(
