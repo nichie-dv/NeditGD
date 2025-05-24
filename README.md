@@ -38,7 +38,7 @@ The Editor class handles loading and saving the data automatically. You only nee
 
 ```python
 # Load the most recent level using Editor.load_current_level()
-editor = Editor.load_current_level(live_edit=True)
+editor = Editor.load_current_level()
 
 # Make all the necessary changes (add/delete objects)
 editor.add_object(
