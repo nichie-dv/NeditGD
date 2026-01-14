@@ -1,6 +1,12 @@
+from NeditGD.Dictionaries.PropertyID import KEY_OFFSET
+
+
 BOOLEAN_IDS = [
     4, 5, 11, 13, 14, 15, 16, 17, 34, 41, 42,
     55, 56, 58, 59, 62, 64, 65, 66, 67, 70, 78,
     81, 86, 87, 89, 93, 94, 96, 98, 99, 100, 102,
-    103, 104, 106
+    103, 104, 106, 138, 141, 142, 200, 393, 394, 397, 544,
+    35+KEY_OFFSET, 21+KEY_OFFSET,
+    3+KEY_OFFSET, 28+KEY_OFFSET, 29+KEY_OFFSET, 8+KEY_OFFSET, 11+KEY_OFFSET, 20+KEY_OFFSET
 ]
+

@@ -1,7 +1,7 @@
 from __future__ import annotations
+from NeditGD.Dictionaries.Triggers import Trigger
 from NeditGD.saveload import *
 from NeditGD import Object
-
 import json
 from websocket import create_connection
 from typing import List
@@ -33,6 +33,11 @@ class Editor():
 
         self.head = None
         self.objects = []
+
+
+        #debug only - remove before pushing
+        self.raw_level = ''
+
         self.loaded_obj_count = 0
         Editor.__last = self
 
@@ -61,6 +66,7 @@ class Editor():
         if raw['status'] != 'successful':
             raise ConnectionError('[Nedit/WSL]: Level could not be read')
         data = raw['response']
+        self.raw_level = data
         self.objects = read_level_objects(data)
 
     def socket_remove_group(self, group: int=9999):
@@ -73,7 +79,7 @@ class Editor():
     def socket_save_objects(self):
         scripted = self.get_scripted_objects()
         data = Object.list_to_robtop(scripted)
-
+        
         packet = {
             "action": "ADD_OBJECTS",
             "objects": data
@@ -186,11 +192,14 @@ class Editor():
 
     # Add an object to the editor object list;
     # Mark it with group 9999
-    def add_object(self, obj: dict, mark_as_scripted: bool=True):
+    def add_object(self, obj: dict | Trigger, mark_as_scripted: bool=True):
+        gameobject = obj
+        if isinstance(obj, Trigger):
+            gameobject = obj._obj
         if mark_as_scripted:
-            Editor.add_group(obj, 9999)
-        if obj.editor_layer_1 is None:
-            obj.editor_layer_1 = Editor.default_layer
+            Editor.add_group(gameobject, 9999)
+        if gameobject.editor_layer_1 is None:
+            gameobject.editor_layer_1 = Editor.default_layer
 
         self.objects.append(obj)
 
@@ -216,6 +225,12 @@ class Editor():
 
     # Get a string representing all objects in readable format
     def read_objects(self, oid_alias: bool=False):
+        res = ''
+        for obj in self.objects:
+            res += obj.__str__(oid_alias=oid_alias) + '\n'
+        return res
+    
+    def read_objects_raw(self, oid_alias: bool=False):
         res = ''
         for obj in self.objects:
             res += obj.__str__(oid_alias=oid_alias) + '\n'

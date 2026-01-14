@@ -1,3 +1,5 @@
+KEY_OFFSET = 2000
+
 NAME_TO_ID = {
     'id': 1,
     'x': 2,
@@ -87,7 +89,7 @@ NAME_TO_ID = {
     'disable_rotation': 98,
     'orb_multi_activate': 99,
     'use_target': 100,
-    'target_pos_axes': 101,
+    'target_pos_axes': 101, #move trigger (1: x only, 2: y only) 
     'editor_disable': 102,
     'high_detail': 103,
     'count_multi_activate': 104,
@@ -152,6 +154,7 @@ NAME_TO_ID = {
     'gradient_vertex_mode': 207,
     'gradient_disable': 208,
     'gradient_id': 209,
+    'new_hsv': 210, #0 - legacy hsv (flipped)
     'quick_start': 211,
     'follow_group': 212,
     'follow_easing': 213,
@@ -185,7 +188,7 @@ NAME_TO_ID = {
     'follow_mode': 394,
     'center_group_id': 395,
     'target_move_distance': 396,
-    'rotation_dynamic': 397,
+    'dynamic_mode': 397,
     'rotation_target': 401,
     'rotation_offset': 402,
     'events': 430,
@@ -231,9 +234,62 @@ NAME_TO_ID = {
     'dont_boost_x': 509,
     'extended_collision': 511,
     'event_target': 525,
+    'use_control_id': 535,
     'dont_edit_area_parent': 539,
     'neg_op_1': 578,
     'neg_op_2': 579,
+
+
+    'area_center': 538,
+    'small_step': 393,
+    'to_opacity': 275,
+    'from_opacity': 286,
+
+    'keyframe_rotate_dir': 536,
+    'keyframe_group': 373, #like linked objects
+    'keyframe_index': 374,
+    'keyframe_line_opacity': 524,
+    'keyframe_x360': 537,
+    'keyframe_time_mod': 520,
+    'keyframe_pos_x_mod': 521,
+    'keyframe_pos_y_mod': 522,
+    'keyframe_rotation_mod': 523,
+    'silent': 544,
+    'keyframe_scale_x_mod': 545,
+    'keyframe_scale_y_mod': 546,
+
+    'keyframe_point_curve': 378,
+    'keyframe_point_refonly': 375,
+
+    'zoom_amount': 371,
+    'guide_opacity': 506,
+
+    'ui_xref': 385,
+    'ui_yref': 386,
+    'teleport_gravity': 354,
+
+    'rotate_force': 345,
+    'pause_resume': 580,
+    'reset_remap': 581,
+    'spawn_offset': 556,
+    #kA* values are given a high property number and converted back later
+    
+    #startpos properties
+    
+    'reset_camera': 35 + KEY_OFFSET,         #kA35
+    'disable': 21 + KEY_OFFSET,              #kA21
+    'target_order': 19 + KEY_OFFSET,         #kA19
+    'target_channel': 26 + KEY_OFFSET,       #kA26
+    'sp_speed': 4 + KEY_OFFSET,              #kA4
+    'gamemode': 2 + KEY_OFFSET,              #kA2
+    'mini_mode': 3 + KEY_OFFSET,             #kA3
+    'mirror_mode': 28 + KEY_OFFSET,          #kA28
+    'rotate_gameplay': 29 + KEY_OFFSET,      #kA29
+    'sp_dual_mode': 8 + KEY_OFFSET,          #kA8
+    'flip_gravity': 11 + KEY_OFFSET,         #kA11
+    'reverse_gameplay': 20 + KEY_OFFSET,     #kA20
+
+
 }
 
 ALIASES = {
@@ -246,6 +302,9 @@ ALIASES = {
     'cmp_op': 'num_op_3',
     'item_2': 'block_b',
     'item': 'item_id',
+    'chance': 'duration',
+    'random_g2': 'target_pos',
+    'random_g1': 'target'
 }
 
 
@@ -263,6 +322,7 @@ def print_missing():
     prev = 0
     missing = []
     for v in sorted(NAME_TO_ID.values()):
+        
         if v - prev == 2:
             print(v - 1)
         elif v - prev == 3:

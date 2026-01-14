@@ -4,8 +4,12 @@ from typing import Any, Iterable
 from numbers import Number
 from copy import deepcopy
 from NeditGD.Dictionaries.PropertyID import get_property_id
+from NeditGD.Dictionaries.PropertyID import KEY_OFFSET
 from NeditGD.Dictionaries.IDNames import oid_from_alias, oid_to_alias
 import NeditGD.properties as properties
+from NeditGD.Dictionaries.BooleanID import BOOLEAN_IDS
+
+
 
 # A class that represents a Geometry Dash object
 # as a dictionary containing all of its properties.
@@ -107,19 +111,58 @@ class Object(UserDict):
     def from_robtop(cls, rob: str) -> Object:
         obj = {}
         arr_obj = rob.split(',')
-        encoded_pairs = [(arr_obj[i], arr_obj[i+1])
-                        for i in range(0, len(arr_obj), 2)]
-        for (k, v) in encoded_pairs:
-            obj[f'_{k}'] = properties.decode_property_pair(int(k), v)
+
+        # Build key/value pairs
+        for i in range(0, len(arr_obj), 2):
+            k, v = arr_obj[i], arr_obj[i + 1]
+
+            if k.isdigit():
+                # Numeric keys → use _ prefix
+                p_id = int(k)
+            elif k.startswith('kA'):
+                # Convert kA* keys → 2000+ IDs
+                p_id = KEY_OFFSET + int(k[2:])
+            else:
+                # Unknown key → optional fallback
+                if not hasattr(obj, 'extra_props'):
+                    obj.extra_props = {}
+                obj.extra_props[k] = v
+                continue
+
+            # **Always use underscore prefix for kwargs**
+            obj[f'_{p_id}'] = properties.decode_property_pair(p_id, v)
+
         return Object(**obj)
     
     # To save an object, it is converted to RobTop's string encoding.
     def to_robtop(self) -> str:
         res = ''
-        for (k, v) in self.data.items():
-            if Object.is_tmp_key(k): continue
-            res += properties.encode_property(k, v)
-        return res[:-1]
+        for k, v in self.data.items():
+            if Object.is_tmp_key(k):
+                continue
+
+            #int keys
+            if isinstance(k, int):
+                p_id = k
+            elif isinstance(k, str) and k.startswith('_'):
+                p_id = int(k[1:])
+            else:
+                continue
+            
+            #level keys
+            if p_id >= 2000:
+                rob_key = f'kA{p_id - 2000}'
+            else:
+                rob_key = str(p_id)
+            value = v
+            if p_id in BOOLEAN_IDS:
+                value = 1 if v == True else 0
+                
+
+            # Encode
+            res += properties.encode_property(rob_key, value)
+
+        return res[:-1] 
 
     @staticmethod
     def list_to_robtop(objects: Iterable[Object]):

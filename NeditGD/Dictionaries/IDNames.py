@@ -51,6 +51,10 @@ OBJECT_IDS = {
     'item_comp_t' : 3620,
 }
 
+ONE_TWO_KEYS = [
+    101, 580
+]
+
 def oid_from_alias(alias: str) -> int:
     return OBJECT_IDS.get(alias, -1)
 
