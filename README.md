@@ -6,23 +6,45 @@
 
 ## Installation
 
-### Via Pip
+ This fork can only be installed manually; add to project path.
 
- Nedit is now on [PyPi](https://pypi.org/project/NeditGD/)! After [downloading python](https://www.python.org/downloads/) and [installing Pip](https://pip.pypa.io/en/stable/installation/), run the following command in your terminal of choice:
-`pip install NeditGD`
- Which will install Nedit as a package. After that, you can import the main features from Nedit at the start of your file:
-`from NeditGD import Object, Editor`
 
-### Manual via GitHub
+## Coming Soon
 
- If you would like to interact with the source code directly, you can download it from the [GitHub page of Nedit](https://github.com/Boris-Filin/NeditGD).
- Note that Git will be updated more frequently with experimental changes.
+### Trigger
+
+ Trigger is a base class or template that every trigger can inherit from. Due to robtop using property keys pretty erattically, I am having to manually rename keys in context of their trigger.
+ For example, the key `duration` usually targets the duration of a trigger, however in the random trigger, `duration` actually corresponds to the chance value.
+
+ Below is an example of how to use the new trigger objects:
+
+ ```python
+# create a new color trigger
+color_trigger = Triggers.Color()
+
+# set the color values of the trigger to 10
+color_trigger.red = 10
+
+color_trigger.green = 10
+
+color_trigger.blue = 10
+
+del color_trigger
+
+# likewise, attributes can also be set when creating the object:
+color_trigger = Triggers.Color(red = 10, green = 10, blue = 10)
+
+# there exists a very large list of property aliases that is being updated as more triggers get added,
+# which can be found in Dictionaries/TriggerAlias.py
+
+```
+ 
 
 ## Main components
 
 ### Object
 
-Object is a generic dictionary-like class that stores all properties for a given GD object. Properties can be addressed via dot syntax or  dictionary indexing.
+Object is a generic dictionary-like class that stores all properties for a given GD object. Properties can be addressed via dot syntax or dictionary indexing.
 
 ```python
 # Init spike
@@ -153,7 +175,7 @@ editor.add_objects(your_object_list, mark_as_scripted=False)
 ## Credits
 
 - Code written and hosted by Nemo2510
-- Live editing introduced by Niche
+- Live editing introduced by Nichie
 
 ### Property decoding and testing
 
