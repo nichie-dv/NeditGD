@@ -2,6 +2,8 @@
 
  Lightweight Geometry Dash level scripting tool
 
+ This fork is a WIP, I'm currently overhauling it to make it more user friendly.
+
 ## Installation
 
 ### Via Pip
