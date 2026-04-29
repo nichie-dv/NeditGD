@@ -1,4 +1,5 @@
-from NeditGD import Editor, Triggers, Links
+from NeditGD import Editor, Triggers
+from NeditGD.Depreciated import Links
 
 
 if __name__ == '__main__':
