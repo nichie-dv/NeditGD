@@ -1,4 +1,4 @@
-from NeditGD.Config import Log
+from NeditGD.Config import Log, PrefixType
 
 from NeditGD.Dictionaries.DataTypes import *
 from NeditGD.Dictionaries.Enums import *

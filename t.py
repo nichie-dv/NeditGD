@@ -8,4 +8,6 @@ else: pulse.target_id = 20
 
 editor.add_object(pulse)
 
+print(pulse)
+
 editor.save_changes()

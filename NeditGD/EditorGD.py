@@ -1,16 +1,13 @@
 from __future__ import annotations
+from websocket import create_connection
 import json
 
 
 from NeditGD.Dictionaries.ObjectClasses import *
 
-
 from NeditGD.saveload import *
 
-from NeditGD.Config import Log
-
-from websocket import create_connection
-from typing import List
+from NeditGD.Config import Log, PrefixType
 
 
 WATERMARK_TEXT = [
@@ -20,9 +17,7 @@ WATERMARK_TEXT = [
     TextObject(id=914, x=-147, y=-56, scale=0.2, text="(You can remove this watermark, but we'd appreciate it if you didn't)"),
 ]
 
-PREFIX = '[Nedit]:'
-
-PAD = ' ' * len(PREFIX)
+PAD = ' ' * 8
 
 # The class that stores all loaded objects and handles
 # interactions with the SaveLoad system for the user
@@ -60,7 +55,7 @@ class Editor:
         try:
             self.socket = create_connection("ws://127.0.0.1:1313")
         except ConnectionRefusedError:
-            Log.warn('No editor socket found! Enable WSLiveEdit and open Geometry Dash.', 2)
+            Log.warn('No editor socket found! Enable WSLiveEdit and open Geometry Dash.', PrefixType.WEBSOCKET)
             raise ConnectionRefusedError()
 
 
@@ -73,7 +68,7 @@ class Editor:
 
 
         if response["status"] != "successful":
-            Log.warn('Failed reading level', 2)
+            Log.warn('Failed reading level', PrefixType.WEBSOCKET)
             raise ConnectionError()
             
 
@@ -122,7 +117,7 @@ class Editor:
     def load_live_editor(cls, load_existing=True, remove_scripted=True):
 
         editor = cls(True)
-        Log.info("Using current level", 2)
+        Log.info("Using current level", PrefixType.WEBSOCKET)
 
 
         if load_existing: editor.socket_load_data()
@@ -181,13 +176,13 @@ class Editor:
             with open(path, "r") as f: data = f.read()
 
         except:
-            Log.warn("Default level data missing!", 1)
+            Log.warn("Default level data missing!", PrefixType.NORMAL)
             raise FileNotFoundError()
 
         self.head = read_level_head(data)
         self.objects = []
 
-        Log.success("Level initialised successfully!", 1)
+        Log.success("Level initialised successfully!", PrefixType.NORMAL)
 
 
     @classmethod
@@ -200,7 +195,7 @@ class Editor:
     @classmethod
     def get_last(cls):
         if cls.__last is None:
-            Log.warn('Editor has not been initialized!', 1)
+            Log.warn('Editor has not been initialized!', PrefixType.NORMAL)
             raise ReferenceError()
 
         return cls.__last
@@ -236,11 +231,6 @@ class Editor:
 
         if mark_as_scripted: self.add_group(obj, 9999)
 
-
-  
-        if hasattr(obj, "editor_layer"):
-            if obj.editor_layer == 0: obj.editor_layer = self.default_layer
-
         self.objects.append(obj)
 
 
@@ -263,7 +253,7 @@ class Editor:
         for obj in objects: self.add_object(obj, mark_as_scripted)
         extra = f"\n{PAD}^ {message}" if message else ""
 
-        Log.success(f"Added {len(objects)} objects to editor.{extra}", 1)
+        Log.success(f"Added {len(objects)} objects to editor.{extra}", PrefixType.NORMAL)
 
 
 
@@ -280,7 +270,7 @@ class Editor:
     def save_changes(self):
         self.add_objects(WATERMARK_TEXT, message="Watermark")
         delta = len(self.objects)-self.loaded_obj_count
-        Log.info(f"Added {delta} objects total.", 1)
+        Log.info(f"Added {delta} objects total.", PrefixType.NORMAL)
 
         save_string = self.get_robtop_string()
 
@@ -298,13 +288,13 @@ class Editor:
 
         encryptGamesave(xml)
 
-        Log.success("Changes saved!", 1)
+        Log.success("Changes saved!", PrefixType.NORMAL)
 
 
 
     def save_changes_live(self, save_string:str):
         self.socket_save_objects()
-        Log.success("Changes sent successfully", 2)
+        Log.success("Changes sent successfully", PrefixType.WEBSOCKET)
 
 
 

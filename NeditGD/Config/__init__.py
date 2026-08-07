@@ -1,2 +1,2 @@
-from .Logging import Log
+from .Logging import Log, PrefixType
 

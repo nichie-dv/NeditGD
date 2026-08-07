@@ -8,91 +8,52 @@
 
  This fork can only be installed manually; add to project path.
 
+## TODO
+- Particles
+- Type checks
+- Other
 
-## Coming Soon
+## WIP
 
-### Trigger
+### Object Classes
 
- Trigger is a base class or template that every trigger can inherit from. Due to robtop using property keys pretty erattically, I am having to manually rename keys in context of their trigger.
- For example, the key `duration` usually targets the duration of a trigger, however in the random trigger, `duration` actually corresponds to the chance value.
+In this version, a variety of Object classes are generated using data from [this website](https://flowvix.github.io/gd-info-explorer/props). You can run the various Generator scripts to generate new classes and enums from the data downloaded here if it updates. Under `Dictionaries/ObjectClasses.py`, there are a whole bunch of new classes for objects, that contain properties that those objects have in game, instead of just using property keys and guessing the name.
 
- Below is an example of how to use the new trigger objects:
+In Geometry Dash, multiple keys are reused depending on the object, which makes having a static list define all of their names impractical. By using my generated classes, you don't have to cross reference to make sure the properties are correct. If a specific object type is not used, use `Common`, which is the base class for all objects. Below is an example:
 
  ```python
-# create a new color trigger
-color_trigger = Triggers.Color()
+# Everything you need can be imported like so
+from NeditGD import *
 
-# set the color values of the trigger to 10
-color_trigger.red = 10
+# Initialize for websocket editing (what i use)
+editor = Editor().load_live_editor()
 
-color_trigger.green = 10
+# Create a pulse trigger and place it at (30, 30)
+pulse = PulseTrigger(x = 30, y = 30)
 
-color_trigger.blue = 10
+# Set the target channel
+pulse.target_id = 10
 
-del color_trigger
+# Add to the editor
+editor.add_object(pulse)
 
-# likewise, attributes can also be set when creating the object:
-color_trigger = Triggers.Color(red = 10, green = 10, blue = 10)
-
-# there exists a very large list of property aliases that is being updated as more triggers get added,
-# which can be found in Dictionaries/TriggerAlias.py
+# Save changes
+editor.save_changes()
 
 ```
- 
+Along with this change, printing objects may look a little different now too. Default object strings now contain extra data to identify them better. The format is as follows: 
+- `Class | Properties | Object Name (optional) | UUID`
 
-## Main components
+Example:
+- `PulseTrigger|(id=1006, x=30, y=30, target_id=10, groups=9999)|unknown|b0d745ee-9ae8-4f0b-8ad5-09e11ee5c3bb`
 
-### Object
 
-Object is a generic dictionary-like class that stores all properties for a given GD object. Properties can be addressed via dot syntax or dictionary indexing.
+Objects can now be easily serialized by obtaining their string. If you want you can also use `obj.get_robtop_string()` to get the robtop serialized version:
 
-```python
-# Init spike
-obj = Object(
-    id = 'spike',
-    x = 15,
-    y = 15
-)
-# Add group 42 to spike
-obj.groups = ['42']
-# Move spike to editor layer 2
-obj['layer'] = 2
-```
+- `1,1006,2,30,3,30,51,10,57,9999`
 
-Properties surrounded by underscores are discarded. They allow you to store information in objects during code execution that is not passed into the GD level
+For example if you wanted to be able to uniquely identify all added objects, you can reference them by their `token` attribute. A `name` can also be set for better organization.
 
-```python
-objects = []
-for i in range(10):
-    obj = Object(
-        id = 'spike',
-        x = 15 + 30 * i,
-        y = 15,
-        # Record the object's index
-        _i_ = i
-    )
-    objects.append(obj)
-
-...
-
-for obj in objects:
-    # Move odd spikes half a block up
-    if obj._i_ % 2:
-        obj.y += 15
-```
-
-Objects have helper methods that allow you to change the most common properties more conveniently. They return the object so you can chain them.
-
-```python
-objects = []
-obj = Object(...)
-# Move object to given position
-obj.move_to(15, 75)
-# Move object relatively to its position
-obj.move(15, 0)
-# Add a group to an object and set its layer
-objects.append(obj.add_group(42).to_layer(2))
-```
 
 ### Editor
 
@@ -131,7 +92,8 @@ editor = Editor.load_live_editor()
 
 # Make all the necessary changes (add/delete objects)
 editor.add_object(
-    Object(id='spike', x=75, y=-15, groups=[12, 42], scale=5))
+    Common(id=8, x=75, y=-15, groups=[12, 42], scale=5)
+)
 
 # Make all the necessary changes (add/delete objects)
 editor.save_changes()
@@ -148,7 +110,8 @@ editor = Editor.load_current_level()
 
 # Make all the necessary changes (add/delete objects)
 editor.add_object(
-    Object(id='spike', x=75, y=-15, groups=[12, 42], scale=5))
+    Common(id=8, x=75, y=-15, groups=[12, 42], scale=5)
+)
 
 # Make all the necessary changes (add/delete objects)
 editor.save_changes()
@@ -163,6 +126,7 @@ editor.save_changes()
 
  ...
 editor = Editor.load_current_level(remove_scripted=False)
+
 editor.add_objects(your_object_list, mark_as_scripted=False)
 ```
 
@@ -175,11 +139,17 @@ editor.add_objects(your_object_list, mark_as_scripted=False)
 ## Credits
 
 - Code written and hosted by Nemo2510
-- Live editing introduced by Nichie
+- Code overhaul by nichie
+- Live editing introduced by nichie
 
-### Property decoding and testing
+### Special Thanks
 
 Huge thanks to people who helped me dig for property ids and debug Nedit:
 
 - [Incidius](https://github.com/Incidius)
 - Toastium
+
+Other help:
+
+- [FlowVix](https://github.com/FlowVix) - [gd info explorer](https://flowvix.github.io/gd-info-explorer)
+- [iAndyHD3](https://github.com/iAndyHD3) - [WSLiveEditor](https://github.com/iAndyHD3/WSLiveEditor)
