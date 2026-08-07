@@ -1,5 +1,6 @@
 import os
 from NeditGD import Editor
+from NeditGD.Config import Log
 
 
 SUBDIRECTORY = '\\Level_instances\\'
@@ -8,7 +9,7 @@ PATH = os.getcwd() + SUBDIRECTORY
 # Write data to a file in plaintext
 def save_to_file(name: str, data: str) -> None:
     os.makedirs(PATH, exist_ok=True)
-    print('[Nedit]: Saving current level data to:', SUBDIRECTORY + name)
+    Log.info('Saving current level data to:', SUBDIRECTORY + name, 1)
     fw = open(PATH + name, "w")
     fw.write(data)
     fw.close()
@@ -18,7 +19,7 @@ def load_from_file(name: str) -> str:
     fr = open(PATH + name, "r")
     data = fr.read()
     fr.close()
-    print('[Nedit]: Data loaded from:', SUBDIRECTORY + name)
+    Log.info('Data loaded from:', SUBDIRECTORY + name, 1)
     return data
 
 # Load the current level and save its contents to a text file
@@ -30,15 +31,15 @@ def record_current_level(name: str, msg: str) -> None:
 # Load data from a text file and save to the current levle
 def overload_current_level(name: str) -> None:
     msg, data = load_from_file(name).split('#')
-    print(f'[Nedit]: Save description: \"{msg}\"')
+    Log.info('Save description: \"{msg}\"', 1)
     editor = Editor.load_from_robtop(data)
-    print(len(editor.objects))
+    Log.debug(len(editor.objects))
     editor.save_changes()
 
 # Read the message of a savefile
 def read_message(name: str) -> None:
     msg = load_from_file(name).split('#')[0]
-    print(f'[Nedit]: Save description:\n{msg}')
+    Log.info('Save description:\n{msg}', 1)
 
 # A printed menu with all the options
 def menu() -> None:
@@ -46,12 +47,13 @@ def menu() -> None:
     if os.path.exists(PATH):
         saves = os.listdir(PATH)
         print_saves(saves)
-
-    print('[Nedit]: Select options:\n'
+    
+    Log.info('Select options:\n'
           '  (1): Save current level\n'
           '  (2): OVERWRITE current level with a save\n'
           '  (3): Read save message\n'
-          '  (4): QUIT\n')
+          '  (4): QUIT\n', 1)
+    
     inp = input()
 
     if inp == '1':
@@ -60,28 +62,29 @@ def menu() -> None:
         record_current_level(name, msg)
 
     elif inp == '2' and saves:
-        print('[Nedit]: WARNING: This will overwrite the most '
+        Log.warn('WARNING: This will overwrite the most '
               'recent level in your custom levels list! Make sure'
-              'you have put an empty level there!')
+              'you have put an empty level there!', 1)
+        
         confirm = input('[Nedit]: Enter \'OK\' to continue:\n')
         if confirm.lower() != 'ok':
-            print('[Nedit]: Confirmation failed!')
+            Log.error('Confirmation failed!', 1)
             quit()
-        print('[Nedit]: Please select one of the listed saves to load!')
+        Log.info('Please select one of the listed saves to load!', 1)
         name = input().lower()
         if not name in map(str.lower, saves):
-            print('[Nedit]: Save not found!')
+            Log.error('Save not found!', 1)
             quit()
         overload_current_level(name)
 
     elif inp == '2':
-        print('[Nedit]: You have no levels saved!')
+        Log.error('You have no levels saved!', 1)
 
     elif inp == '3':
-        print('[Nedit]: Please select one of the listed saves to read!')
+        Log.error('Please select one of the listed saves to read!', 1)
         name = input().lower()
         if not name in map(str.lower, saves):
-            print('[Nedit]: Save not found!')
+            Log.error('Save not found!', 1)
             quit()
         read_message(name)
     

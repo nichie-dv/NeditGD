@@ -1,24 +1,23 @@
-from editor_gd import Editor
-import sys
+from EditorGD import Editor
+from NeditGD.Config import Log
 from argparse import ArgumentParser
 
 
 def read_objects(editor: Editor, args):
-    print("[Nedit]: Objects in level:")
-    objects = editor.read_objects(
-        oid_alias=args.alias)
-    print(objects)
+    Log.info('Objects in level:', 1)
+    objects = editor.read_objects(oid_alias=args.alias)
+    Log.info(objects)
 
 def read_ids(editor: Editor, args):
-    print("[Nedit]: IDs of objects in level:")
+    Log.info('IDs of objects in level:', 1)
     objects = editor.objects[:]
     objects.sort(key = lambda o : o.x)
     for obj in objects:
-        print(obj.id)
+        Log.info(obj.id)
 
 def read_groups(editor: Editor, args):
-    print("[Nedit]: Groups used in the level:")
-    print(editor.get_used_group_pool())
+    Log.info('Groups used in the level:', 1)
+    Log.info(editor.get_used_group_pool())
 
 def main():
     parser = ArgumentParser()

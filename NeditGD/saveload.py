@@ -3,7 +3,7 @@ import struct
 import base64, gzip, zlib
 import xml.etree.ElementTree as ET
 
-from NeditGD.object_gd import Object
+from NeditGD.Dictionaries.ObjectClasses import *
 
 
 SAVE_FILE = "CCLocalLevels.dat"
@@ -147,7 +147,7 @@ def read_level_objects(level_string: str) -> dict:
     while objects and not objects[-1]:
         if objects and not objects[-1]:
             objects = objects[:-1]
-    objects = list(map(Object.from_robtop, objects))
+    objects = list(map(Common.from_robtop_string, objects))
     return objects
 
 # Read the level head info - for save purposes only
@@ -157,7 +157,7 @@ def read_level_head(level_string: str) -> str:
     return level_string.split(';')[0]
 
 # Construct the save string from modified objects and head
-def get_level_save_string(objects: list[Object], level_head: str):
+def get_level_save_string(objects: list[object], level_head: str):
     obj_encodings = [obj.to_robtop() for obj in objects]
     obj_string = ';'.join(obj_encodings)
     level_string = f'{level_head};{obj_string};'

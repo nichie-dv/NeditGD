@@ -1,4 +1,4 @@
-from NeditGD import Object
+from NeditGD import LegacyObject
 import NeditGD.properties as properties
 from NeditGD.Dictionaries import TriggerAlias, BooleanID, IDNames
 from NeditGD.Dictionaries.TriggerAlias import EASINGS, COLOR_IDS

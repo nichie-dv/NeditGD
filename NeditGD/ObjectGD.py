@@ -1,21 +1,39 @@
+
 from __future__ import annotations
 from collections import UserDict
 from typing import Any, Iterable
 from numbers import Number
 from copy import deepcopy
-from NeditGD.Dictionaries.PropertyID import get_property_id
-from NeditGD.Dictionaries.PropertyID import KEY_OFFSET
-from NeditGD.Dictionaries.IDNames import oid_from_alias, oid_to_alias
 import NeditGD.properties as properties
-from NeditGD.Dictionaries.BooleanID import BOOLEAN_IDS
 
 
 
-# A class that represents a Geometry Dash object
+
+
+
+
+
+from NeditGD.Dictionaries.DataTypes import *
+from NeditGD.Dictionaries.ObjectClasses import *
+from enum import Enum
+from typing import TYPE_CHECKING, Any
+from uuid import uuid4
+
+#TODO: full rewrite of Object
+
+
+
+def get_property_id(i):
+    pass
+
+"""
+
+
+# A class that represents a Geometry Dash LegacyObject
 # as a dictionary containing all of its properties.
 # Each property can be accesed either with its property id
 # (decided by RobTop), or by a string alias (assigned by Nedit).
-class Object(UserDict):
+class LegacyObject(UserDict):
 
     _aliases = {}
 
@@ -30,17 +48,17 @@ class Object(UserDict):
     # different parameters. The copied object is passed, along with
     # the changed properties and their new values.
     @classmethod
-    def copy(cls, original: Object, **kwargs) -> Object:
+    def copy(cls, original: LegacyObject, **kwargs) -> LegacyObject:
         obj = deepcopy(original)
         for k, v in kwargs.items():
             obj[k] = v
         return obj
 
-    # When the object is accessed as a dictionary,
+    # When the LegacyObject is accessed as a dictionary,
     # it automatically converts property aliases to integer ids
     def __setitem__(self, key: int | str, item: Any) -> None:
         if type(key) is int or \
-            Object.is_tmp_key(key):
+            LegacyObject.is_tmp_key(key):
             return self.set_item_int_key(key, item)
         if (_id := get_property_id(key)) is not None:
             return self.set_item_int_key(_id, item)
@@ -48,7 +66,7 @@ class Object(UserDict):
             _id = int(key[1:])
             return self.set_item_int_key(_id, item)
         except: pass
-        raise KeyError(f'Objects have no property called \'{key}\'.')
+        raise KeyError(f'LegacyObjects have no property called \'{key}\'.')
     
 
     # Set an item given an integer key;
@@ -59,11 +77,11 @@ class Object(UserDict):
         return self.data.__setitem__(key, item)
 
     
-    # When the object is accessed as a dictionary,
+    # When the LegacyObject is accessed as a dictionary,
     # it automatically converts property aliases to integer ids
     def __getitem__(self, key: int | str) -> Any:
         if type(key) is int or \
-            Object.is_tmp_key(key):
+            LegacyObject.is_tmp_key(key):
             return self.data.__getitem__(key)
         if (_id := get_property_id(key)) is not None:
             return self.data.__getitem__(_id)
@@ -77,13 +95,13 @@ class Object(UserDict):
 
 
     # When a property is accessed as a Python property, it is
-    # converted to integer id and fetched from the object dictionary.
+    # converted to integer id and fetched from the LegacyObject dictionary.
     def __setattr__(self, __name: str, __value: Any) -> None:
         if (_id := get_property_id(__name)) is not None:
             if _id == 1 and type(__value) is str:
                 __value = oid_from_alias(__value)
             return self.data.__setitem__(_id, __value)
-        elif Object.is_tmp_key(__name):
+        elif LegacyObject.is_tmp_key(__name):
             return self.data.__setitem__(__name, __value)
         try:
             _id = int(__name[1:])
@@ -92,11 +110,11 @@ class Object(UserDict):
             super().__setattr__(__name, __value)
 
     # When a property is accessed as a Python property, it is
-    # converted to integer id and fetched from the object dictionary.
+    # converted to integer id and fetched from the LegacyObject dictionary.
     def __getattr__(self, __name):
         if (_id := get_property_id(__name)) is not None:
             return self.data.get(_id)
-        elif Object.is_tmp_key(__name):
+        elif LegacyObject.is_tmp_key(__name):
             return self.data.get(__name)
         try:
             _id = int(__name[1:])
@@ -105,10 +123,10 @@ class Object(UserDict):
             return super().__getattr__(__name)
 
 
-    # When loading from a game save, every object is
+    # When loading from a game save, every LegacyObject is
     # reconstructed from RobTop's string encoding.
     @classmethod
-    def from_robtop(cls, rob: str) -> Object:
+    def from_robtop(cls, rob: str) -> LegacyObject:
         obj = {}
         arr_obj = rob.split(',')
 
@@ -132,13 +150,13 @@ class Object(UserDict):
             # **Always use underscore prefix for kwargs**
             obj[f'_{p_id}'] = properties.decode_property_pair(p_id, v)
 
-        return Object(**obj)
+        return LegacyObject(**obj)
     
-    # To save an object, it is converted to RobTop's string encoding.
+    # To save an LegacyObject, it is converted to RobTop's string encoding.
     def to_robtop(self) -> str:
         res = ''
         for k, v in self.data.items():
-            if Object.is_tmp_key(k):
+            if LegacyObject.is_tmp_key(k):
                 continue
 
             #int keys
@@ -165,16 +183,16 @@ class Object(UserDict):
         return res[:-1] 
 
     @staticmethod
-    def list_to_robtop(objects: Iterable[Object]):
-        return ';'.join(obj.to_robtop() for obj in objects)
+    def list_to_robtop(LegacyObjects: Iterable[LegacyObject]):
+        return ';'.join(obj.to_robtop() for obj in LegacyObjects)
     
 
-    # The string representation of the object uses property aliases,
+    # The string representation of the LegacyObject uses property aliases,
     # which have to be deduced from property ids.
     def __str__(self, include_tmp: bool=True, oid_alias=False) -> str:
         descr = ''
         for k, v in self.data.items():
-            if Object.is_tmp_key(k):
+            if LegacyObject.is_tmp_key(k):
                 if not include_tmp: continue
                 key_str = k
             else:
@@ -201,7 +219,7 @@ class Object(UserDict):
     # QoL functionality
     # -===============-
     
-    def move(self, x: Number|Iterable, y: Number=None):
+    def move_by(self, x: Number|Iterable, y: Number=None):
         if y is None:
             x, y = x
         self.x += x
@@ -241,26 +259,5 @@ def get_pos(x: float, y: float=None) -> tuple[float] | float:
     return (x * 30 + 15, y * 30 + 15)
 
 
-    
-if __name__ == '__main__':
-    obj = Object(id=2, groups=[1, 2])
-    # obj['id'] = 1
-    obj[2] = 15
-    print(obj[1], obj['x'], obj['y'], obj['groups'])
-    obj._4 = 1
-    print(obj.x)
-    print(obj._private_)
-    obj._private_ = 42
-    print(obj)
-    print('>', obj['_private_'])
-    print('>', obj._private_)
-    print(obj[4])
-    # print(obj[5])
-    obj._57 = []
-    print(obj.to_robtop())
+"""
 
-    # obj._42 = 'trace'
-    obj['_42'] = 'trace'
-
-    print(obj)
-    print(obj._aliases)

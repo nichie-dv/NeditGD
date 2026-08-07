@@ -1,7 +1,12 @@
-from NeditGD.object_gd import Object, get_pos
-from NeditGD.editor_gd import Editor
-from NeditGD.Dictionaries.PropertyHSV import HSV
-from NeditGD.Dictionaries import Triggers
+from NeditGD.Config import Log
+
+from NeditGD.Dictionaries.DataTypes import *
+from NeditGD.Dictionaries.Enums import *
+from NeditGD.Dictionaries.ObjectClasses import *
+
+from NeditGD.EditorGD import Editor
+
+
 
 
 __version__ = "0.3.0"

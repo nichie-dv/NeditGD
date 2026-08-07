@@ -26,12 +26,7 @@ def decode_property_pair(p_id: int, data: str) -> int | float | list[int]:
 
     if p_id == NAME_TO_ID['particle_setup']:
         return data
-    #     print(data)
-    #     em = Emitter.from_string(data)
-    #     print(em)
-    #     print(data)
-    #     print(em.get_property_list())
-    #     return Emitter.from_string(data)
+
 
     try: return int(data)
     except: pass

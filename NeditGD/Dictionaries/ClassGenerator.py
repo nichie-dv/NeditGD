@@ -1,172 +1,700 @@
+#Run this script every time an updated json is created
+JSON_PATH = 'NeditGD/Dictionaries/objs.json'
+OUTPUT_PATH = 'NeditGD/Dictionaries/ObjectClasses.py'
+
 import json, datetime
-from enum import Enum
 
-CLASSES = {}
-DEFAULT_CLASS = {}
-ID_CLASS = {}
+SINGLE_TAB = ' '*4
+DOUBLE_TAB = ' '*8
 
-DATA_TYPES = {
-    'NInt': '0',
-    'NFloat': '0',
-    'NBool': 'False',
-    'NString': None,
-    'HSVString': '',
-    'GroupList': '[]',
-    'ParticleString': '',
-    'RemapList': 7,
-    'AdvRandomList': 8,
-    'SequenceList': 9,
-    'EventList': 10,
-    'GroupID': 11,
-    'ColorID': 12,
-    'ItemID': 13,
-    'TimerID': 14,
-    'BlockID': 15,
-    'ControlID': 16,
-    'EffectID': 17,
-    'UniqueID': 18,
-    'SFXGroup': 19,
-    'ChannelID': 20,
-    'ForceID': 21,
-    'ColorOrGroupID': 22,
-    'GroupOrControlID': 23,
-    'GroupOrEffectID': 24,
-    'ItemOrTimerID': 25,
-    'Easing': 26,
-    'XYOnly': 27,
-    'Color1P9': 28,
-    'SingleColorType': 29,
-    'TriggerLayer': 30,
-    'SoundDirs': 31,
-    'KeyframeRotDir': 32,
-    'KeyframeMode': 33,
-    'StopMode': 34,
-    'AdvancedFollowMode': 35,
-    'AdvancedFollowPage2Mode': 36,
-    'AreaDirButtonsDir': 37,
-    'AreaCenterSpecial': 38,
-    'Background': 39,
-    'Ground': 40,
-    'MiddleGround': 41,
-    'TouchPlayerOnly': 42,
-    'TouchToggle': 43,
-    'InstantCountComparison': 44,
-    'GradientBlend': 45,
-    'CameraEdge': 46,
-    'ReverbType': 47,
-    'PickupMultiplyDivide': 48,
-    'ItemTriggerTyp': 49,
-    'ItemTriggerOp': 50,
-    'ItemTriggerAbsNeg': 51,
-    'ItemTriggerRounding': 52,
-    'ItemTriggerCompareOp': 53,
-    'SequenceMode': 54,
-    'ArrowDir': 55,
-    'LabelAlign': 56,
-    'LabelSpecial': 57,
-    'UIRef': 58,
-    'OptionSet': 59,
-    'TeleportGravity': 60,
-    'EnterExitOnly': 61,
-    'BPMSpeed': 62
-}
-   
+ENUMS = [
+    "GroupList",
+    "RemapList",
+    "AdvRandomList",
+    "SequenceList",
+    "EventList",
+    "HSVString",
+    "ParticleString"
+]
 
 def get_inheritence_string(classes):
-    if (len(classes) == 0):
-        return ''
-    
-
+    if (len(classes) == 0): return ''
     str = '('
-
-    for index, item in enumerate(classes):
-        str += f'{item}{', ' if (index < len(classes) - 1) else ')'}'
-
-
+    for index, item in enumerate(classes): str += f'{item}{', ' if (index < len(classes) - 1) else ')'}'
     return str
 
-def get_default(type: str):
-    i = DATA_TYPES[type]
-    match (type):
-        case 'Bool':
-            return 'False'
-        case "Float" | "Int":
-            return "0"
-        case "String":
-            return "\'\'"
-        
-
-        case 0:
-            pass
 
 def get_properties_string(props):
     string = ''
 
+    #In most cases it isnt necesary to set default types, but it looks cleaner
+    #All enum types require a default
     for name, item in props.items():
-        type_str = 'None'
-        type_case = item[1]
-        actual_case = False
+        type_case = item[1] #type string
+        actual_case = False #use actual case
 
-        match (item[1]):
+        if type_case in ENUMS: default = ''
+        else: default = '0'
+
+        #Built-in wrapper types
+        match item[1]:
             case 'Int':
                 type_case = 'NInt'
+                default = '0'
             case 'Float':
                 type_case = 'NFloat'
+                default = '0.0'
             case 'Bool':
                 type_case = 'NBool'
+                default = 'False'
+            case 'String':
+                type_case = 'NString'
+                default = '\'\''
+
+            #Enum types / default types
+            case _:
+                if type_case not in ENUMS:
+                    type_case = item[1]
+                    default = '0' #easier to do this than check enum type and wrap each one
+
         
-        if (item[1] in ['GroupID', 'ColorID', 'ItemID', 'TimerID', 'BlockID', 'ControlID', 'EffectID', 'UniqueID', 'SFXGroup', 'ChannelID', 'ForceID', 'ColorOrGroupID', 'GroupOrControlID', 'GroupOrEffectID', 'ItemOrTimerID']):
+        #convert all of these types to int since theyre redundant
+        if item[1] in [
+            'GroupID', 'ColorID', 'ItemID', 'TimerID',
+            'BlockID', 'ControlID', 'EffectID',
+            'UniqueID', 'SFXGroup', 'ChannelID',
+            'ForceID', 'ColorOrGroupID',
+            'GroupOrControlID', 'GroupOrEffectID',
+            'ItemOrTimerID']:
+            
             type_case = 'NInt'
+            default = '0'
+
             actual_case = True
 
-
         
+        #set default object id to 1
+        if (name == 'id'): default = '1'
 
-        string += f'        self.{name} = {type_case}()    {f'#Actual type is {item[1]}()' if actual_case else ''}\n'
+        note = f" # {item[2]}" if item[2] else ""
+
+        string += (
+            f'{DOUBLE_TAB}self.{name} = {type_case}({default})'
+            f'{SINGLE_TAB}{f"#!-- Actual type is {item[1]}() --!#" if actual_case else ""}'
+            f'{note}\n'
+        )
+
     return string
 
 
 def get_formatted_properties_string(props):
     string = ''
-
-    for name, item in props.items():
-        string += f'{' '*8}self._{name} = {item[0]}\n'
+    for name, item in props.items(): string += f'{' '*8}self.__{name} = {item[0]}\n'
     return string
 
 
-with open('NeditGD/Dictionaries/objs.json', 'r') as f:
-    data = json.load(f)
+def class_to_enum_name(name: str) -> str:
+    result = ""
 
-with open('NeditGD/Dictionaries/output.py', 'w') as f:
-    f.write('#!-- Autogenerated by ClassGenerator.py at --!#\n')
-    f.write(f'#!-- {datetime.datetime.now().astimezone()} --!#\n\n')
+    for i, char in enumerate(name):
+        if char.isupper() and i != 0: result += "_"
+        result += char.upper()
 
-    f.write('from NeditGD import Object, HSV\n')
-    f.write('from DataTypes import *\n')
-    f.write('from enum import Enum\n\n\n')
+    return result
 
+
+
+
+
+#load json
+with open(JSON_PATH, 'r') as f: data = json.load(f)
+
+
+
+
+with open(OUTPUT_PATH, 'w') as f:
+    f.write(f'#!-- Autogenerated by ClassGenerator.py @ {datetime.datetime.now().astimezone()} --!#\n\n')
+
+    f.write('from NeditGD.Dictionaries.DataTypes import *\n')
+    f.write('from NeditGD.Dictionaries.Enums import *\n')
+    f.write('from typing import Iterable\n')
+    f.write('from enum import Enum\n')
+    f.write('from uuid import uuid4\n')
+    f.write('from base64 import b64encode, b64decode\n\n\n')
     f.write('\n\n')
-    
+
+
+
+
+    #Loop through classes
     for class_name in data['classes']:
         inherits = []
         properties = {}
 
+        #create list of classes to inherit from (likely just 1)
+        for ihclass_name in data['classes'][class_name]['inherits']: inherits.append(ihclass_name)
 
-        for ihclass_name in data['classes'][class_name]['inherits']:
-            inherits.append(ihclass_name)
+        #prepare properties per class
+        for index, field in enumerate(data['classes'][class_name]['fields']): properties[field['name']] = (field['id'], field['type'], field['note'])
 
-        for index, field in enumerate(data['classes'][class_name]['fields']):
-            properties[field['name']] = (field['id'], field['type'], field['note'])
-
-        
+        #class header
         f.write(f'class {class_name}{get_inheritence_string(inherits) if len(inherits) > 0 else ''}:\n')
-        
-        f.write(f'    def __init__(self):\n')
-        if (class_name == 'Common'): f.write(f'{' '*8}self._object = Object()\n\n')
-        if (len(inherits) > 0): f.write(f'{' '*8}super().__init__()\n\n')
-        f.write(f'{' '*8}#Property Types:\n{get_properties_string(properties) if len(properties) > 0 else f'{'    '*2}pass\n'}\n')
-        f.write(f'{' '*8}#Property IDs:\n{get_formatted_properties_string(properties) if len(properties) > 0 else '\n'}')
+
+        #init
+        f.write(
+            f'{SINGLE_TAB}def __init__(self'
+            f'{", name=\'unknown\'" if class_name == "Common" else ""}'
+            f', **kwargs):\n'
+        )
+
+        #if class inherits
+        if (len(inherits) > 0): f.write(f'{" "*8}super().__init__()\n\n')
+
+
+        #post super init variables
+        if class_name == "Common":
+            f.write(f'{DOUBLE_TAB}self._name = name\n')
+            f.write(f'{DOUBLE_TAB}self._token = uuid4()\n\n')
+
+        id = 1
+        match class_name:
+            case "Common":
+                id = 1
+
+            case "DashOrb":
+                id = 1704
+
+            case "CustomParticles":
+                id = 2065
+
+            case "TextObject":
+                id = 914
+
+            case "Collectible":
+                id = 1329
+
+            case "RotatingObject":
+                id = 1705
+
+            case "AnimatedObject":
+                id = 1050
+
+            case "KeyframeObject":
+                id = 3032
+
+            case "Trigger":
+                id = 1049
+
+            case "ColorTrigger":
+                id = 899
+
+            case "BackgroundColorTrigger":
+                id = 29
+
+            case "BackgroundSpeedTrigger":
+                id = 3606
+
+            case "MiddleGroundSpeedTrigger":
+                id = 3612
+
+            case "EditMiddleGroundTrigger":
+                id = 2999
+
+            case "MoveTrigger":
+                id = 901
+
+            case "PulseTrigger":
+                id = 1006
+
+            case "AlphaTrigger":
+                id = 1007
+
+            case "ToggleTrigger":
+                id = 1049
+
+            case "ShakeTrigger":
+                id = 1520
+
+            case "AnimateTrigger":
+                id = 1585
+
+            case "SpawnTrigger":
+                id = 1268
+
+            case "RotateTrigger":
+                id = 1346
+
+            case "ScaleTrigger":
+                id = 2067
+
+            case "FollowTrigger":
+                id = 1347
+
+            case "StopTrigger":
+                id = 1616
+
+            case "KeyframeAnimTrigger":
+                id = 3033
+
+            case "FollowPlayerYTrigger":
+                id = 1814
+
+            case "AdvancedFollowTrigger":
+                id = 3016
+
+            case "EditAdvancedFollowTrigger":
+                id = 3660
+
+            case "RetargetAdvancedFollowTrigger":
+                id = 3661
+
+            case "AreaEditAreaTriggerCommon":
+                id = 3011
+
+            case "AreaTrigger":
+                id = 3006
+
+            case "EditAreaTrigger":
+                id = 3011
+
+            case "AreaMoveTriggerCommon":
+                id = 3006
+
+            case "AreaMoveTrigger":
+                id = 3006
+
+            case "EditAreaMoveTrigger":
+                id = 3011
+
+            case "AreaRotateTriggerCommon":
+                id = 3007
+
+            case "AreaRotateTrigger":
+                id = 3007
+
+            case "EditAreaRotateTrigger":
+                id = 3012
+
+            case "AreaScaleTriggerCommon":
+                id = 3008
+
+            case "AreaScaleTrigger":
+                id = 3008
+
+            case "EditAreaScaleTrigger":
+                id = 3013
+
+            case "AreaFadeTriggerCommon":
+                id = 3009
+
+            case "AreaFadeTrigger":
+                id = 3009
+
+            case "EditAreaFadeTrigger":
+                id = 3014
+
+            case "AreaTintTriggerCommon":
+                id = 3010
+
+            case "AreaTintTrigger":
+                id = 3010
+
+            case "EditAreaTintTrigger":
+                id = 3015
+
+            case "StopAreaTrigger":
+                id = 3024
+
+            case "BackgroundTrigger":
+                id = 3029
+
+            case "GroundTrigger":
+                id = 3030
+
+            case "MiddleGroundTrigger":
+                id = 3031
+
+            case "TouchTrigger":
+                id = 1595
+
+            case "CountTrigger":
+                id = 1611
+
+            case "InstantCountTrigger":
+                id = 1811
+
+            case "GradientTrigger":
+                id = 2903
+
+            case "StaticCameraTrigger":
+                id = 1914
+
+            case "CameraZoomTrigger":
+                id = 1913
+
+            case "CameraRotateTrigger":
+                id = 2015
+
+            case "CameraEdgeTrigger":
+                id = 2062
+
+            case "CameraModeTrigger":
+                id = 2925
+
+            case "CameraGuide":
+                id = 2016
+
+            case "CameraOffsetTrigger":
+                id = 1916
+
+            case "SongTrigger":
+                id = 1934
+
+            case "SFXTrigger":
+                id = 3602
+
+            case "PickupTrigger":
+                id = 1817
+
+            case "TimeTrigger":
+                id = 3614
+
+            case "TimeEventTrigger":
+                id = 3615
+
+            case "TimeControlTrigger":
+                id = 3617
+
+            case "ItemEditTrigger":
+                id = 3619
+
+            case "ItemCompareTrigger":
+                id = 3620
+
+            case "ItemPersistenceTrigger":
+                id = 3641
+
+            case "RandomTrigger":
+                id = 1912
+
+            case "AdvancedRandomTrigger":
+                id = 2068
+
+            case "SequenceTrigger":
+                id = 3607
+
+            case "SpawnParticleTrigger":
+                id = 3608
+
+            case "ResetTrigger":
+                id = 3618
+
+            case "ArrowTrigger":
+                id = 2900
+
+            case "EventTrigger":
+                id = 3604
+
+            case "TimewarpTrigger":
+                id = 1935
+
+            case "CounterLabel":
+                id = 1615
+
+            case "UITrigger":
+                id = 3613
+
+            case "CollisionTrigger":
+                id = 1815
+
+            case "InstantCollisionTrigger":
+                id = 3609
+
+            case "CollisionStateBlock":
+                id = 3640
+
+            case "CollisionBlock":
+                id = 1816
+
+            case "ToggleBlock":
+                id = 3643
+
+            case "OptionsTrigger":
+                id = 2899
+
+            case "OnDeathTrigger":
+                id = 1812
+
+            case "GravityTrigger":
+                id = 2066
+
+            case "PlayerControlTrigger":
+                id = 1932
+
+            case "TeleportCommon":
+                id = 3022
+
+            case "TeleportTrigger":
+                id = 3022
+
+            case "BlueTeleportal":
+                id = 747
+
+            case "TeleportOrb":
+                id = 3027
+
+            case "ShaderTrigger":
+                id = 2904
+
+            case "ShaderTriggerCommon":
+                id = 2922
+
+            case "ShockwaveShaderTrigger":
+                id = 2905
+
+            case "ShockLineShaderTrigger":
+                id = 2907
+
+            case "GlitchShaderTrigger":
+                id = 2909
+
+            case "ChromaticShaderTrigger":
+                id = 2910
+
+            case "ChromaGlitchShaderTrigger":
+                id = 2911
+
+            case "PixelateShaderTrigger":
+                id = 2912
+
+            case "LensCircleShaderTrigger":
+                id = 2913
+
+            case "RadialBlurShaderTrigger":
+                id = 2914
+
+            case "MotionBlurShaderTrigger":
+                id = 2915
+
+            case "BulgeShaderTrigger":
+                id = 2916
+
+            case "PinchShaderTrigger":
+                id = 2917
+
+            case "GrayscaleShaderTrigger":
+                id = 2919
+
+            case "SepiaShaderTrigger":
+                id = 2920
+
+            case "InvertColorShaderTrigger":
+                id = 2921
+
+            case "HueShaderTrigger":
+                id = 2922
+
+            case "EditColorTrigger":
+                id = 2923
+
+            case "EnterEffectTrigger":
+                id = 3017
+
+            case "EditSongTrigger":
+                id = 3605
+
+            case "EditSFXTrigger":
+                id = 3603
+
+            case "ForceBlock":
+                id = 2069
+
+            case "EndTrigger":
+                id = 3600
+
+            case "SecretCoin":
+                id = 142
+
+            case "OldEndTrigger":
+                id = 1931
+
+            case "Template":
+                id = 2895
+
+            case "CheckpointTrigger":
+                id = 2063
+
+            case "BPMGuide":
+                id = 3642
+
+            case _:
+                id = 1
+
+        f.write(f'{DOUBLE_TAB}self.id = NInt({id})\n\n')
+
+
+
+
+        #properties
+        f.write(f'{DOUBLE_TAB}#Property Types:\n{get_properties_string(properties) if len(properties) > 0 else f'{DOUBLE_TAB}pass\n'}\n')
+
+        #property keys
+        f.write(f'{DOUBLE_TAB}#Property IDs:\n{get_formatted_properties_string(properties) if len(properties) > 0 else '\n'}')
+
+        #unfortunately is neccesary in each type because extended classes contain more properties than what they inherit
+        f.write("""
+        for key, value in kwargs.items():
+            try: setattr(self, key, value)
+            except AttributeError: pass
+""")
+
+
+
+
+        #extra functions
+
+        #Common
+        if class_name == "Common": f.write("""
+    def __str__(self): return self.get_object_string()
+    def __repr__(self): return self.get_object_string()
+
+    @property
+    def token(self): return self._token
+    @property
+    def name(self): return self._name
+
+    @name.setter
+    def name(self, name): self._name = name
+
+    @staticmethod
+    def list_to_robtop(Common: Iterable[object]): return ';'.join(obj.get_robtop_string() for obj in Common)
+
+    def get_object_string(self):
+        result = []
+
+        properties = []
+
+        for cls in type(self).mro():
+            prefix = f"_{cls.__name__}__"
+
+            properties.extend([
+                (k, v)
+                for k, v in vars(self).items()
+                if k.startswith(prefix)
+            ])
+
+        for private_name, prop_id in sorted(properties, key=lambda x: x[1]):
+            attr_name = private_name.split("__", 1)[1]
+            value = getattr(self, attr_name)
+
+            if isinstance(value, Enum):
+                if value.value == 0 and attr_name not in {"id", "x", "y"}:
+                    continue
+            else:
+                try:
+                    if value == type(value)() and attr_name not in {"id", "x", "y"}:
+                        continue
+                except (TypeError, ValueError):
+                    pass
+
+            result.append(f"{attr_name}={value!r}")
+
+        name = f"{self._name}|" if self._name else ""
+        return f"{type(self).__name__}|({', '.join(result)})|{name}{self._token}"
+
+    def get_robtop_string(self):
+        result = []
+
+        properties = []
+
+        for cls in type(self).mro():
+            prefix = f"_{cls.__name__}__"
+
+            properties.extend([
+                (k, v)
+                for k, v in vars(self).items()
+                if k.startswith(prefix)
+            ])
+
+        for private_name, prop_id in sorted(properties, key=lambda x: x[1]):
+            attr_name = private_name.split("__", 1)[1]
+            value = getattr(self, attr_name)
+
+            try: default = type(value)()
+            except TypeError: continue
+
+            if prop_id == 31: value = b64encode(value.encode()).decode()
+            if value == default and attr_name not in {"id", "x", "y"}: continue
+
+            result.append(str(prop_id))
+            result.append(str(value))
+
+        return ",".join(result)
+
+    @classmethod
+    def from_robtop_string(cls, rob):
+        kwargs = {}
+
+        # Build property ID -> attribute name map
+        properties = {}
+
+        template = cls()
+
+        for c in cls.mro():
+            prefix = f"_{c.__name__}__"
+
+            for private_name, prop_id in vars(template).items():
+                if private_name.startswith(prefix):
+                    attr_name = private_name[len(prefix):]
+                    properties[prop_id] = attr_name
+
+
+        values = rob.split(',')
+
+        for i in range(0, len(values), 2):
+
+            prop_id = int(values[i])
+            value = values[i + 1]
+
+            if prop_id == 31: value = b64decode(value.encode()).decode()
+
+
+            if prop_id not in properties: continue
+
+
+            name = properties[prop_id]
+
+
+            # Get the datatype object currently assigned
+            current = getattr(template, name)
+
+
+            try:
+                # Recreate the datatype wrapper
+                kwargs[name] = type(current)(value)
+
+            except Exception:
+                # Fallback for normal python types
+                kwargs[name] = value
+
+
+        return cls(**kwargs)
+""")
+
+            
+        #TextObject
+        if (class_name == 'TextObject'): f.write("""
+    @property
+    def text(self): return b64decode(self._text).decode()   
+    @text.setter
+    def text(self, value): self._text = b64encode(value.encode()).decode()
+""")
+
+
+        #end padding
         f.write('\n\n')
+
+        
 
 
 

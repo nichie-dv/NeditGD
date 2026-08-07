@@ -1,3 +1,2 @@
-from .BasicConfig import Config
-from .LogColors import BasicColors
+from .Logging import Log
 

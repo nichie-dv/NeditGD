@@ -1,5 +1,5 @@
-from NeditGD.editor_gd import Editor
-from NeditGD.object_gd import Object
+from NeditGD.EditorGD import Editor
+from NeditGD.ObjectGD import Object
 from typing import Tuple
 
 class MarkerLoader():
