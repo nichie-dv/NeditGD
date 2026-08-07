@@ -1,5 +1,5 @@
 #Run this script every time an updated json is created
-JSON_PATH = 'NeditGD/Dictionaries/objs.json'
+JSON_PATH = 'NeditGD/Dictionaries/Data/objs.json'
 OUTPUT_PATH = 'NeditGD/Dictionaries/ObjectClasses.py'
 
 import json, datetime
@@ -557,6 +557,15 @@ with open(OUTPUT_PATH, 'w') as f:
         if class_name == "Common": f.write("""
     def __str__(self): return self.get_object_string()
     def __repr__(self): return self.get_object_string()
+
+    def __setattr__(self, name, value):
+        current = self.__dict__.get(name)
+
+        if isinstance(current, NBool) and isinstance(value, bool):
+            current._NBool__truth = value
+            return
+
+        super().__setattr__(name, value)
 
     @property
     def token(self): return self._token

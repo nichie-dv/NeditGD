@@ -12,7 +12,7 @@ from NeditGD.Config import Log, PrefixType
 
 WATERMARK_TEXT = [
     TextObject(id=914, x=-165, y=-15, scale=0.75, text="Made with Nedit"),
-    TextObject(id=914, x=-165, y=-30, scale=0.5, text="by Nemo2510 and Nichie"),
+    TextObject(id=914, x=-165, y=-30, scale=0.5, text="by Nemo2510 and nichie"),
     TextObject(id=914, x=-175, y=-41, scale=0.35, text="github.com/Boris-Filin/NeditGD"),   
     TextObject(id=914, x=-147, y=-56, scale=0.2, text="(You can remove this watermark, but we'd appreciate it if you didn't)"),
 ]

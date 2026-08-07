@@ -1,13 +1,15 @@
 from NeditGD import *
 editor = Editor().load_live_editor()
 
-pulse = PulseTrigger(x = 30, y = 30)
+SCALE = 20
 
-if (True): pulse.target_id = 10
-else: pulse.target_id = 20
-
-editor.add_object(pulse)
-
-print(pulse)
-
+for y in range(SCALE):
+    for x in range(SCALE):
+        index = x + (y * SCALE)
+        o = ToggleTrigger(x = (x * 30) + 15, y = (y * 30) + 15)
+        o.target_group = index
+        if index % 3 == 0: o.activate_group = True
+        editor.add_object(o)
+        if (index < 10): Log.debug(o)
+        
 editor.save_changes()

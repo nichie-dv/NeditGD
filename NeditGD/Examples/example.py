@@ -1,32 +1,19 @@
-from NeditGD import Editor, Object, HSV
+"""
+Makes a nice pattern with toggle triggers
+"""
 
-# This is an example of how to use the library:
-#   1. Load the most recent level using Editor.load_current_level()
-#   2. Make all the necessary changes (add/delete objects)
-#   3. Save your changes with editor.save_changes()
+from NeditGD import *
+editor = Editor().load_live_editor()
 
-emitter_id = -1
+SCALE = 20
 
-if __name__ == '__main__':
-    editor = Editor.load_current_level()
-
-    obj = Object(id='block', x=75, y=-15, groups=[12, 42], scale=5)
-    obj.hsv_enabled = 1
-    obj.hsv = HSV(20, 1.3, 0.7, True)
-    editor.add_object(obj)
-
-    obj2 = obj.copy(
-        obj,
-        x=165
-    )
-    obj2.id = 'spike'
-    editor.add_object(obj2)
-
-    editor.add_object(Object(
-        id=1268, #Spawn trigger
-        x=15,
-        y=15,
-        spawn_remap=[(1, 2), (3, 4)]
-    ))
-    
-    editor.save_changes()
+for y in range(SCALE):
+    for x in range(SCALE):
+        index = x + (y * SCALE)
+        o = ToggleTrigger(x = (x * 30) + 15, y = (y * 30) + 15)
+        o.target_group = index
+        if index % 3 == 0: o.activate_group = True
+        editor.add_object(o)
+        if (index < 10): Log.debug(o)
+        
+editor.save_changes()
