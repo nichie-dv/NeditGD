@@ -32,6 +32,7 @@ with open(OUTPUT_PATH, 'w') as f:
     P1 = 1005
     P2 = 1006
     G2 = 1009
+    BLACK = 1010
     MG = 1013
     MG2 = 1014
 
