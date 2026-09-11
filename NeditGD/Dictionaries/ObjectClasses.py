@@ -9,7 +9,7 @@ from base64 import b64encode, b64decode
 
 
 CLASS_TO_ID = {
-    "Common": 1,
+    "Object": 1,
     "DashOrb": 1704,
     "CustomParticles": 2065,
     "TextObject": 914,
@@ -140,7 +140,7 @@ for class_name, object_id in CLASS_TO_ID.items():
 
 
 
-class Common:
+class Object:
     def __init__(self, name='unknown', **kwargs):
         self._name = name
         self._token = uuid4().hex.upper()
@@ -302,7 +302,7 @@ class Common:
     def name(self, name): self._name = name
 
     @staticmethod
-    def list_to_robtop(Common: Iterable[object]): return ';'.join(obj.get_robtop_string() for obj in Common)
+    def list_to_robtop(Object: Iterable[object]): return ';'.join(obj.get_robtop_string() for obj in Object)
 
     def get_object_string(self):
         result = []
@@ -385,7 +385,7 @@ class Common:
             if class_names:
                 class_name = class_names[0]
 
-                # Find the actual Python class
+                # Find the class
                 object_class = globals().get(class_name)
 
                 if object_class is not None:
@@ -405,7 +405,12 @@ class Common:
 
         for i in range(0, len(values) - 1, 2):
 
-            prop_id = int(values[i])
+            try:
+                prop_id = int(values[i])
+            except Exception:
+                # will probably get thrown if using a level string here
+                continue
+
             value = values[i + 1]
 
             if prop_id == 31:
@@ -426,7 +431,7 @@ class Common:
         return cls(**kwargs)
 
 
-class DashOrb(Common):
+class DashOrb(Object):
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -451,7 +456,7 @@ class DashOrb(Common):
             except AttributeError: pass
 
 
-class CustomParticles(Common):
+class CustomParticles(Object):
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -478,7 +483,7 @@ class CustomParticles(Common):
             except AttributeError: pass
 
 
-class TextObject(Common):
+class TextObject(Object):
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -502,7 +507,7 @@ class TextObject(Common):
     def text(self, value): self._text = b64encode(value.encode()).decode()
 
 
-class Collectible(Common):
+class Collectible(Object):
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -535,7 +540,7 @@ class Collectible(Common):
             except AttributeError: pass
 
 
-class RotatingObject(Common):
+class RotatingObject(Object):
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -554,7 +559,7 @@ class RotatingObject(Common):
             except AttributeError: pass
 
 
-class AnimatedObject(Common):
+class AnimatedObject(Object):
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -587,7 +592,7 @@ class AnimatedObject(Common):
             except AttributeError: pass
 
 
-class KeyframeObject(Common):
+class KeyframeObject(Object):
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -634,7 +639,7 @@ class KeyframeObject(Common):
             except AttributeError: pass
 
 
-class Trigger(Common):
+class Trigger(Object):
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -1398,7 +1403,7 @@ class RetargetAdvancedFollowTrigger(Trigger):
             except AttributeError: pass
 
 
-class AreaEditAreaTriggerCommon(Common):
+class AreaEditAreaTriggerCommon(Object):
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -1497,7 +1502,7 @@ class EditAreaTrigger(AreaEditAreaTriggerCommon, Trigger):
             except AttributeError: pass
 
 
-class AreaMoveTriggerCommon(Common):
+class AreaMoveTriggerCommon(Object):
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -1566,7 +1571,7 @@ class EditAreaMoveTrigger(AreaMoveTriggerCommon, EditAreaTrigger):
             except AttributeError: pass
 
 
-class AreaRotateTriggerCommon(Common):
+class AreaRotateTriggerCommon(Object):
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -1619,7 +1624,7 @@ class EditAreaRotateTrigger(AreaRotateTriggerCommon, EditAreaTrigger):
             except AttributeError: pass
 
 
-class AreaScaleTriggerCommon(Common):
+class AreaScaleTriggerCommon(Object):
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -1676,7 +1681,7 @@ class EditAreaScaleTrigger(AreaScaleTriggerCommon, EditAreaTrigger):
             except AttributeError: pass
 
 
-class AreaFadeTriggerCommon(Common):
+class AreaFadeTriggerCommon(Object):
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -1727,7 +1732,7 @@ class EditAreaFadeTrigger(AreaFadeTriggerCommon, EditAreaTrigger):
             except AttributeError: pass
 
 
-class AreaTintTriggerCommon(Common):
+class AreaTintTriggerCommon(Object):
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -2083,7 +2088,7 @@ class CameraModeTrigger(Trigger):
             except AttributeError: pass
 
 
-class CameraGuide(Common):
+class CameraGuide(Object):
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -2668,7 +2673,7 @@ class TimewarpTrigger(Trigger):
             except AttributeError: pass
 
 
-class CounterLabel(Common):
+class CounterLabel(Object):
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -2780,7 +2785,7 @@ class InstantCollisionTrigger(Trigger):
             except AttributeError: pass
 
 
-class CollisionStateBlock(Common):
+class CollisionStateBlock(Object):
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -2799,7 +2804,7 @@ class CollisionStateBlock(Common):
             except AttributeError: pass
 
 
-class CollisionBlock(Common):
+class CollisionBlock(Object):
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -2818,7 +2823,7 @@ class CollisionBlock(Common):
             except AttributeError: pass
 
 
-class ToggleBlock(Common):
+class ToggleBlock(Object):
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -2953,7 +2958,7 @@ class PlayerControlTrigger(Trigger):
             except AttributeError: pass
 
 
-class TeleportCommon(Common):
+class TeleportCommon(Object):
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -3017,7 +3022,7 @@ class TeleportTrigger(TeleportCommon, Trigger):
             except AttributeError: pass
 
 
-class BlueTeleportal(TeleportCommon, Common):
+class BlueTeleportal(TeleportCommon, Object):
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -3034,7 +3039,7 @@ class BlueTeleportal(TeleportCommon, Common):
             except AttributeError: pass
 
 
-class TeleportOrb(TeleportCommon, Common):
+class TeleportOrb(TeleportCommon, Object):
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -3722,7 +3727,7 @@ class EditSFXTrigger(Trigger):
             except AttributeError: pass
 
 
-class ForceBlock(Common):
+class ForceBlock(Object):
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -3812,7 +3817,7 @@ class OldEndTrigger(Trigger):
             except AttributeError: pass
 
 
-class Template(Common):
+class Template(Object):
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -3846,7 +3851,7 @@ class CheckpointTrigger(Trigger):
             except AttributeError: pass
 
 
-class BPMGuide(Common):
+class BPMGuide(Object):
     def __init__(self, **kwargs):
         super().__init__()
 

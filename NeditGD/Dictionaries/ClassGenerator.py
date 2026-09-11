@@ -1,4 +1,6 @@
 #Run this script every time an updated json is created
+
+# Some manual changes will be needed when downloading a new metadata file
 JSON_PATH = 'NeditGD/Dictionaries/Data/objs.json'
 OUTPUT_PATH = 'NeditGD/Dictionaries/ObjectClasses.py'
 
@@ -123,7 +125,7 @@ with open(OUTPUT_PATH, 'w') as f:
     f.write('from base64 import b64encode, b64decode\n\n')
     f.write("""
 CLASS_TO_ID = {
-    "Common": 1,
+    "Object": 1,
     "DashOrb": 1704,
     "CustomParticles": 2065,
     "TextObject": 914,
@@ -270,12 +272,12 @@ for class_name, object_id in CLASS_TO_ID.items():
         for index, field in enumerate(data['classes'][class_name]['fields']): properties[field['name']] = (field['id'], field['type'], field['note'])
 
         #class header
-        f.write(f'class {class_name}{get_inheritence_string(inherits) if len(inherits) > 0 else ''}{'(Common)' if class_name in ['AreaEditAreaTriggerCommon', 'AreaTintTriggerCommon', 'AreaFadeTriggerCommon', 'AreaScaleTriggerCommon', 'AreaRotateTriggerCommon', 'AreaMoveTriggerCommon', 'TeleportCommon'] else ''}:\n')
+        f.write(f'class {class_name}{get_inheritence_string(inherits) if len(inherits) > 0 else ''}{'(Object)' if class_name in ['AreaEditAreaTriggerCommon', 'AreaTintTriggerCommon', 'AreaFadeTriggerCommon', 'AreaScaleTriggerCommon', 'AreaRotateTriggerCommon', 'AreaMoveTriggerCommon', 'TeleportCommon'] else ''}:\n')
 
         #init
         f.write(
             f'{SINGLE_TAB}def __init__(self'
-            f'{", name=\'unknown\'" if class_name == "Common" else ""}'
+            f'{", name=\'unknown\'" if class_name == "Object" else ""}'
             f', **kwargs):\n'
         )
 
@@ -284,13 +286,13 @@ for class_name, object_id in CLASS_TO_ID.items():
 
 
         #post super init variables
-        if class_name == "Common":
+        if class_name == "Object":
             f.write(f'{DOUBLE_TAB}self._name = name\n')
             f.write(f'{DOUBLE_TAB}self._token = uuid4().hex.upper()\n\n')
 
         id = 1
         match class_name:
-            case "Common":
+            case "Object":
                 id = 1
 
             case "DashOrb":
@@ -685,8 +687,8 @@ for class_name, object_id in CLASS_TO_ID.items():
 
         #extra functions
 
-        #Common
-        if class_name == "Common": f.write("""
+        #Object
+        if class_name == "Object": f.write("""
     def __str__(self): return self.get_object_string()
     def __repr__(self): return self.get_object_string()
 
@@ -708,7 +710,7 @@ for class_name, object_id in CLASS_TO_ID.items():
     def name(self, name): self._name = name
 
     @staticmethod
-    def list_to_robtop(Common: Iterable[object]): return ';'.join(obj.get_robtop_string() for obj in Common)
+    def list_to_robtop(Object: Iterable[object]): return ';'.join(obj.get_robtop_string() for obj in Object)
 
     def get_object_string(self):
         result = []
@@ -791,7 +793,7 @@ for class_name, object_id in CLASS_TO_ID.items():
             if class_names:
                 class_name = class_names[0]
 
-                # Find the actual Python class
+                # Find the class
                 object_class = globals().get(class_name)
 
                 if object_class is not None:
@@ -811,7 +813,12 @@ for class_name, object_id in CLASS_TO_ID.items():
 
         for i in range(0, len(values) - 1, 2):
 
-            prop_id = int(values[i])
+            try:
+                prop_id = int(values[i])
+            except Exception:
+                # will probably get thrown if using a level string here
+                continue
+
             value = values[i + 1]
 
             if prop_id == 31:

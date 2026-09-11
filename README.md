@@ -19,7 +19,7 @@
 
 In this version, a variety of Object classes are generated using data from [this website](https://flowvix.github.io/gd-info-explorer/props). You can run the various Generator scripts to generate new classes and enums from the data downloaded here if it updates. Under `Dictionaries/ObjectClasses.py`, there are a whole bunch of new classes for objects, that contain properties that those objects have in game, instead of just using property keys and guessing the name.
 
-In Geometry Dash, multiple keys are reused depending on the object, which makes having a static list define all of their names impractical. By using my generated classes, you don't have to cross reference to make sure the properties are correct. If a specific object type is not used, use `Common`, which is the base class for all objects. Below is an example:
+In Geometry Dash, multiple keys are reused depending on the object, which makes having a static list define all of their names impractical. By using my generated classes, you don't have to cross reference to make sure the properties are correct. If a specific object type is not used, use `Object`, which is the base class for all objects. Below is an example:
 
  ```python
 # Everything you need can be imported like so
@@ -92,7 +92,7 @@ editor = Editor.load_live_editor()
 
 # Make all the necessary changes (add/delete objects)
 editor.add_object(
-    Common(id=8, x=75, y=-15, groups=[12, 42], scale=5)
+    Object(id=8, x=75, y=-15, groups=[12, 42], scale=5)
 )
 
 # Make all the necessary changes (add/delete objects)
@@ -110,7 +110,7 @@ editor = Editor.load_current_level()
 
 # Make all the necessary changes (add/delete objects)
 editor.add_object(
-    Common(id=8, x=75, y=-15, groups=[12, 42], scale=5)
+    Object(id=8, x=75, y=-15, groups=[12, 42], scale=5)
 )
 
 # Make all the necessary changes (add/delete objects)

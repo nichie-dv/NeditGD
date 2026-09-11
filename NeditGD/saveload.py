@@ -121,6 +121,56 @@ def set_level_data(level: ET, level_encrypted: str):
     level.text = level_encrypted
 
 
+# Data can be stored in guideline string
+def set_level_guideline_string(level_string: str, guideline_string: str) -> str:
+    """
+    Replace or add the kA14 value in the RobTop level header.
+
+    guideline_string should already be serialized as:
+        |BASE64~VERSION~
+    """
+
+    
+    head, separator, objects = level_string.partition(";")
+
+    tokens = head.split(",")
+
+    #
+    for i in range(0, len(tokens) - 1, 2):
+        if tokens[i] == "kA14":
+            tokens[i + 1] = guideline_string
+            new_head = ",".join(tokens)
+
+            return new_head + (
+                separator + objects if separator else ""
+            )
+
+    
+    if head and not head.endswith(","):
+        head += ","
+
+    head += f"kA14,{guideline_string}"
+
+    return head + (
+        separator + objects if separator else ""
+    )
+
+# Data can be stored in guideline string
+def get_level_guideline_string(level_string: str) -> str | None:
+    """
+    Get the raw kA14 value from the level header.
+
+    Returns:
+        |BASE64~VERSION~
+    """
+
+    head = level_string.split(";", 1)[0]
+    tokens = head.split(",")
+
+    for i in range(0, len(tokens) - 1, 2):
+        if tokens[i] == "kA14": return tokens[i + 1]
+
+    return None
 
 # Decode the level data 
 def get_working_level_string(gamesave: str = None) -> str:
@@ -147,7 +197,7 @@ def read_level_objects(level_string: str) -> dict:
     while objects and not objects[-1]:
         if objects and not objects[-1]:
             objects = objects[:-1]
-    objects = list(map(Common.from_robtop_string, objects))
+    objects = list(map(Object.from_robtop_string, objects))
     return objects
 
 # Read the level head info - for save purposes only

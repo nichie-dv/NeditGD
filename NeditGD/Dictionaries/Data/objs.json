@@ -1391,7 +1391,7 @@
         }
     },
     "classes": {
-        "Common": {
+        "Object": {
             "inherits": [],
             "fields": [
                 {
@@ -1776,7 +1776,7 @@
         },
         "DashOrb": {
             "inherits": [
-                "Common"
+                "Object"
             ],
             "fields": [
                 {
@@ -1813,7 +1813,7 @@
         },
         "CustomParticles": {
             "inherits": [
-                "Common"
+                "Object"
             ],
             "fields": [
                 {
@@ -1856,7 +1856,7 @@
         },
         "TextObject": {
             "inherits": [
-                "Common"
+                "Object"
             ],
             "fields": [
                 {
@@ -1875,7 +1875,7 @@
         },
         "Collectible": {
             "inherits": [
-                "Common"
+                "Object"
             ],
             "fields": [
                 {
@@ -1936,7 +1936,7 @@
         },
         "RotatingObject": {
             "inherits": [
-                "Common"
+                "Object"
             ],
             "fields": [
                 {
@@ -1955,7 +1955,7 @@
         },
         "AnimatedObject": {
             "inherits": [
-                "Common"
+                "Object"
             ],
             "fields": [
                 {
@@ -2016,7 +2016,7 @@
         },
         "KeyframeObject": {
             "inherits": [
-                "Common"
+                "Object"
             ],
             "fields": [
                 {
@@ -2119,7 +2119,7 @@
         },
         "Trigger": {
             "inherits": [
-                "Common"
+                "Object"
             ],
             "fields": [
                 {
@@ -4403,7 +4403,7 @@
         },
         "CameraGuide": {
             "inherits": [
-                "Common"
+                "Object"
             ],
             "fields": [
                 {
@@ -5436,7 +5436,7 @@
         },
         "CounterLabel": {
             "inherits": [
-                "Common"
+                "Object"
             ],
             "fields": [
                 {
@@ -5620,7 +5620,7 @@
         },
         "CollisionStateBlock": {
             "inherits": [
-                "Common"
+                "Object"
             ],
             "fields": [
                 {
@@ -5639,7 +5639,7 @@
         },
         "CollisionBlock": {
             "inherits": [
-                "Common"
+                "Object"
             ],
             "fields": [
                 {
@@ -5658,7 +5658,7 @@
         },
         "ToggleBlock": {
             "inherits": [
-                "Common"
+                "Object"
             ],
             "fields": [
                 {
@@ -5982,14 +5982,14 @@
         "BlueTeleportal": {
             "inherits": [
                 "TeleportCommon",
-                "Common"
+                "Object"
             ],
             "fields": []
         },
         "TeleportOrb": {
             "inherits": [
                 "TeleportCommon",
-                "Common"
+                "Object"
             ],
             "fields": []
         },
@@ -7210,7 +7210,7 @@
         },
         "ForceBlock": {
             "inherits": [
-                "Common"
+                "Object"
             ],
             "fields": [
                 {
@@ -7328,7 +7328,7 @@
         },
         "Template": {
             "inherits": [
-                "Common"
+                "Object"
             ],
             "fields": [
                 {
@@ -7354,7 +7354,7 @@
         },
         "BPMGuide": {
             "inherits": [
-                "Common"
+                "Object"
             ],
             "fields": [
                 {
@@ -7384,7 +7384,7 @@
             ]
         }
     },
-    "defaultClass": "Common",
+    "defaultClass": "Object",
     "idClasses": {
         "22": "EnterEffectTrigger",
         "23": "EnterEffectTrigger",

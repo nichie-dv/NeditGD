@@ -1,5 +1,5 @@
 from NeditGD.EditorGD import Editor
-from NeditGD.ObjectGD import Object
+from NeditGD.Dictionaries.ObjectClasses import *
 from typing import Tuple
 
 class MarkerLoader():
@@ -12,9 +12,8 @@ class MarkerLoader():
         self.__find_markers()
 
     def __find_markers(self):
-        from NeditGD.Dictionaries.IDNames import OBJECT_IDS
         for obj in self.__editor.objects:
-            if obj.id != OBJECT_IDS['text']: continue
+            if obj.id != 914: continue
             ps, text = MarkerLoader.strip_prefixes(obj.text)
             self.__markers.append((ps, text, obj))
 

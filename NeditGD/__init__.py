@@ -4,9 +4,9 @@ from NeditGD.Dictionaries.DataTypes import *
 from NeditGD.Dictionaries.Enums import *
 from NeditGD.Dictionaries.ObjectClasses import *
 
-from NeditGD.EditorGD import Editor
+from NeditGD.EditorGD import Editor, SaveType
 
-from NeditGD.Nextra.Utilities import rgb_to_hsv, rgb_to_hsvstring
+from NeditGD.Nextra.Utilities import *
 
 
 

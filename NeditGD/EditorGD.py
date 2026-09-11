@@ -1,6 +1,7 @@
 from __future__ import annotations
 from websocket import create_connection
-import json
+import json, base64
+from enum import Enum
 
 
 from NeditGD.Dictionaries.ObjectClasses import *
@@ -10,8 +11,13 @@ from NeditGD.saveload import *
 from NeditGD.Config import Log, PrefixType
 
 
+class SaveType(Enum):
+    STRING = 0
+    JSON = 1
+    XML = 2
+
 CLASS_TO_ID = {
-    "Common": 1,
+    "Object": 1,
     "DashOrb": 1704,
     "CustomParticles": 2065,
     "TextObject": 914,
@@ -156,14 +162,16 @@ class Editor:
     __last: Editor | None = None
 
 
-    def __init__(self, live_edit: bool = True):
+    def __init__(self, live_edit: bool = False):
         self.__root = None
         self.__level_node = None
         self.__level_string = None
         self.__markers = None
 
+        self.__guideline_string = None
+
         self.head = None
-        self.objects: list[Common] = []
+        self.objects: list[Object] = []
 
         self.raw_level = ""
 
@@ -294,10 +302,17 @@ class Editor:
 
         level_data = get_working_level(self.__level_node)
 
-        if data: self.__level_string = data
-        else: self.__level_string = get_working_level_string(level_data)
+        if data:
+            self.__level_string = data
+        else:
+            self.__level_string = get_working_level_string(level_data)
 
         self.head = read_level_head(self.__level_string)
+
+        # Load existing kA14 data
+        self.__guideline_string = get_level_guideline_string(
+            self.__level_string
+        )
 
         self.objects = read_level_objects(self.__level_string)
 
@@ -362,7 +377,7 @@ class Editor:
 
 
 
-    def add_object(self, obj: Common, mark_as_scripted=True):
+    def add_object(self, obj: Object, mark_as_scripted=True):
 
         if mark_as_scripted: self.add_group(obj, 9999)
 
@@ -371,13 +386,13 @@ class Editor:
 
 
     @staticmethod
-    def add_group_to_all(objects: list[Common], group:int):
+    def add_group_to_all(objects: list[Object], group:int):
         for obj in objects: Editor.add_group(obj, group)
 
 
 
     @staticmethod
-    def add_group(obj: Common, group:int):
+    def add_group(obj: Object, group:int):
         if obj.groups is None: obj.groups = [group]
         elif group not in obj.groups: obj.groups.append(group)
 
@@ -400,6 +415,52 @@ class Editor:
     # ----------------
     # SAVING
     # ----------------
+
+    def get_save_string(self):
+        if not self.__guideline_string:
+            return {}
+
+        encoded = self.__guideline_string.strip("|").split("~", 1)[0]
+
+        try:
+            return json.loads(
+                base64.b64decode(encoded).decode("utf-8")
+            )
+        except (ValueError, json.JSONDecodeError):
+            return {}
+
+    """
+    JSON preferred, but accepts String and XML.
+    The value is automatically serialized to:
+        |BASE64~VERSION~
+    """
+    def set_save_string(
+        self,
+        value,
+        type: SaveType = SaveType.JSON
+    ) -> None:
+
+        if type == SaveType.JSON:
+            value = json.dumps(
+                value,
+                separators=(",", ":")
+            )
+
+        elif type == SaveType.STRING:
+            value = str(value)
+
+        elif type == SaveType.XML:
+            if not isinstance(value, str):
+                raise TypeError("XML save data must be a string")
+
+        else:
+            raise ValueError(f"Unsupported SaveType: {type}")
+
+        encoded = base64.b64encode(
+            value.encode("utf-8")
+        ).decode("ascii")
+
+        self.__guideline_string = f"|{encoded}~0.1~"
 
 
     def save_changes(self, dump_metadata=False):
@@ -424,13 +485,15 @@ class Editor:
 
 
 
-    def save_changes_to_file(self, save_string:str):
+    def save_changes_to_file(self, save_string: str):
+        # Update kA14
+        if self.__guideline_string: save_string = set_level_guideline_string(save_string, self.__guideline_string)
 
         encrypted = encrypt_level_string(save_string.encode())
+
         set_level_data(self.__level_node, encrypted)
 
         xml = ET.tostring(self.__root)
-
         encryptGamesave(xml)
 
         Log.success("Changes saved!", PrefixType.NORMAL)
@@ -444,7 +507,12 @@ class Editor:
 
 
     def get_robtop_string(self):
-        return ";".join([obj.get_robtop_string() for obj in self.objects])
+        obj_string = ";".join(
+            obj.get_robtop_string()
+            for obj in self.objects
+        )
+
+        return f"{self.head};{obj_string};"
 
 
 
