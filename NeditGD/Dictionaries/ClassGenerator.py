@@ -120,7 +120,139 @@ with open(OUTPUT_PATH, 'w') as f:
     f.write('from typing import Iterable\n')
     f.write('from enum import Enum\n')
     f.write('from uuid import uuid4\n')
-    f.write('from base64 import b64encode, b64decode\n\n\n')
+    f.write('from base64 import b64encode, b64decode\n\n')
+    f.write("""
+CLASS_TO_ID = {
+    "Common": 1,
+    "DashOrb": 1704,
+    "CustomParticles": 2065,
+    "TextObject": 914,
+    "Collectible": 1329,
+    "RotatingObject": 1705,
+    "AnimatedObject": 1050,
+    "KeyframeObject": 3032,
+    "Trigger": 1049,
+    "ColorTrigger": 899,
+    "BackgroundColorTrigger": 29,
+    "BackgroundSpeedTrigger": 3606,
+    "MiddleGroundSpeedTrigger": 3612,
+    "EditMiddleGroundTrigger": 2999,
+    "MoveTrigger": 901,
+    "PulseTrigger": 1006,
+    "AlphaTrigger": 1007,
+    "ToggleTrigger": 1049,
+    "ShakeTrigger": 1520,
+    "AnimateTrigger": 1585,
+    "SpawnTrigger": 1268,
+    "RotateTrigger": 1346,
+    "ScaleTrigger": 2067,
+    "FollowTrigger": 1347,
+    "StopTrigger": 1616,
+    "KeyframeAnimTrigger": 3033,
+    "FollowPlayerYTrigger": 1814,
+    "AdvancedFollowTrigger": 3016,
+    "EditAdvancedFollowTrigger": 3660,
+    "RetargetAdvancedFollowTrigger": 3661,
+    "AreaTrigger": 3006,
+    "EditAreaTrigger": 3011,
+    "AreaMoveTrigger": 3006,
+    "EditAreaMoveTrigger": 3011,
+    "AreaRotateTrigger": 3007,
+    "EditAreaRotateTrigger": 3012,
+    "AreaScaleTrigger": 3008,
+    "EditAreaScaleTrigger": 3013,
+    "AreaFadeTrigger": 3009,
+    "EditAreaFadeTrigger": 3014,
+    "AreaTintTrigger": 3010,
+    "EditAreaTintTrigger": 3015,
+    "StopAreaTrigger": 3024,
+    "BackgroundTrigger": 3029,
+    "GroundTrigger": 3030,
+    "MiddleGroundTrigger": 3031,
+    "TouchTrigger": 1595,
+    "CountTrigger": 1611,
+    "InstantCountTrigger": 1811,
+    "GradientTrigger": 2903,
+    "StaticCameraTrigger": 1914,
+    "CameraZoomTrigger": 1913,
+    "CameraRotateTrigger": 2015,
+    "CameraEdgeTrigger": 2062,
+    "CameraModeTrigger": 2925,
+    "CameraGuide": 2016,
+    "CameraOffsetTrigger": 1916,
+    "SongTrigger": 1934,
+    "SFXTrigger": 3602,
+    "PickupTrigger": 1817,
+    "TimeTrigger": 3614,
+    "TimeEventTrigger": 3615,
+    "TimeControlTrigger": 3617,
+    "ItemEditTrigger": 3619,
+    "ItemCompareTrigger": 3620,
+    "ItemPersistenceTrigger": 3641,
+    "RandomTrigger": 1912,
+    "AdvancedRandomTrigger": 2068,
+    "SequenceTrigger": 3607,
+    "SpawnParticleTrigger": 3608,
+    "ResetTrigger": 3618,
+    "ArrowTrigger": 2900,
+    "EventTrigger": 3604,
+    "TimewarpTrigger": 1935,
+    "CounterLabel": 1615,
+    "UITrigger": 3613,
+    "CollisionTrigger": 1815,
+    "InstantCollisionTrigger": 3609,
+    "CollisionStateBlock": 3640,
+    "CollisionBlock": 1816,
+    "ToggleBlock": 3643,
+    "OptionsTrigger": 2899,
+    "OnDeathTrigger": 1812,
+    "GravityTrigger": 2066,
+    "PlayerControlTrigger": 1932,
+    "TeleportTrigger": 3022,
+    "BlueTeleportal": 747,
+    "TeleportOrb": 3027,
+    "ShaderTrigger": 2904,
+    "ShockwaveShaderTrigger": 2905,
+    "ShockLineShaderTrigger": 2907,
+    "GlitchShaderTrigger": 2909,
+    "ChromaticShaderTrigger": 2910,
+    "ChromaGlitchShaderTrigger": 2911,
+    "PixelateShaderTrigger": 2912,
+    "LensCircleShaderTrigger": 2913,
+    "RadialBlurShaderTrigger": 2914,
+    "MotionBlurShaderTrigger": 2915,
+    "BulgeShaderTrigger": 2916,
+    "PinchShaderTrigger": 2917,
+    "GrayscaleShaderTrigger": 2919,
+    "SepiaShaderTrigger": 2920,
+    "InvertColorShaderTrigger": 2921,
+    "HueShaderTrigger": 2922,
+    "EditColorTrigger": 2923,
+    "EnterEffectTrigger": 3017,
+    "EditSongTrigger": 3605,
+    "EditSFXTrigger": 3603,
+    "ForceBlock": 2069,
+    "EndTrigger": 3600,
+    "SecretCoin": 142,
+    "OldEndTrigger": 1931,
+    "Template": 2895,
+    "CheckpointTrigger": 2063,
+    "BPMGuide": 3642,
+}
+
+ID_TO_CLASSES = {}
+
+BASE_IDS = []
+
+for class_name, object_id in CLASS_TO_ID.items():
+    ID_TO_CLASSES.setdefault(object_id, []).append(class_name)
+
+for class_name, object_id in CLASS_TO_ID.items():
+    BASE_IDS.append(object_id)
+
+
+
+""")
     f.write('\n\n')
 
 
@@ -138,7 +270,7 @@ with open(OUTPUT_PATH, 'w') as f:
         for index, field in enumerate(data['classes'][class_name]['fields']): properties[field['name']] = (field['id'], field['type'], field['note'])
 
         #class header
-        f.write(f'class {class_name}{get_inheritence_string(inherits) if len(inherits) > 0 else ''}:\n')
+        f.write(f'class {class_name}{get_inheritence_string(inherits) if len(inherits) > 0 else ''}{'(Common)' if class_name in ['AreaEditAreaTriggerCommon', 'AreaTintTriggerCommon', 'AreaFadeTriggerCommon', 'AreaScaleTriggerCommon', 'AreaRotateTriggerCommon', 'AreaMoveTriggerCommon', 'TeleportCommon'] else ''}:\n')
 
         #init
         f.write(
@@ -148,13 +280,13 @@ with open(OUTPUT_PATH, 'w') as f:
         )
 
         #if class inherits
-        if (len(inherits) > 0): f.write(f'{" "*8}super().__init__()\n\n')
+        if (len(inherits) > 0 or class_name in ['AreaEditAreaTriggerCommon', 'AreaTintTriggerCommon', 'AreaFadeTriggerCommon', 'AreaScaleTriggerCommon', 'AreaRotateTriggerCommon', 'AreaMoveTriggerCommon', 'TeleportCommon']): f.write(f'{" "*8}super().__init__()\n\n')
 
 
         #post super init variables
         if class_name == "Common":
             f.write(f'{DOUBLE_TAB}self._name = name\n')
-            f.write(f'{DOUBLE_TAB}self._token = uuid4()\n\n')
+            f.write(f'{DOUBLE_TAB}self._token = uuid4().hex.upper()\n\n')
 
         id = 1
         match class_name:
@@ -644,7 +776,27 @@ with open(OUTPUT_PATH, 'w') as f:
     def from_robtop_string(cls, rob):
         kwargs = {}
 
-        # Build property ID -> attribute name map
+        values = rob.split(',')
+
+        object_id = None
+
+        for i in range(0, len(values) - 1, 2):
+            if int(values[i]) == 1:
+                object_id = int(values[i + 1])
+                break
+
+        if object_id is not None:
+            class_names = ID_TO_CLASSES.get(object_id)
+
+            if class_names:
+                class_name = class_names[0]
+
+                # Find the actual Python class
+                object_class = globals().get(class_name)
+
+                if object_class is not None:
+                    cls = object_class
+
         properties = {}
 
         template = cls()
@@ -657,35 +809,25 @@ with open(OUTPUT_PATH, 'w') as f:
                     attr_name = private_name[len(prefix):]
                     properties[prop_id] = attr_name
 
-
-        values = rob.split(',')
-
-        for i in range(0, len(values), 2):
+        for i in range(0, len(values) - 1, 2):
 
             prop_id = int(values[i])
             value = values[i + 1]
 
-            if prop_id == 31: value = b64decode(value.encode()).decode()
+            if prop_id == 31:
+                value = b64decode(value.encode()).decode()
 
-
-            if prop_id not in properties: continue
-
+            if prop_id not in properties:
+                continue
 
             name = properties[prop_id]
 
-
-            # Get the datatype object currently assigned
             current = getattr(template, name)
 
-
             try:
-                # Recreate the datatype wrapper
                 kwargs[name] = type(current)(value)
-
             except Exception:
-                # Fallback for normal python types
                 kwargs[name] = value
-
 
         return cls(**kwargs)
 """)

@@ -6,6 +6,8 @@ from NeditGD.Dictionaries.ObjectClasses import *
 
 from NeditGD.EditorGD import Editor
 
+from NeditGD.Nextra.Utilities import rgb_to_hsv, rgb_to_hsvstring
+
 
 
 
