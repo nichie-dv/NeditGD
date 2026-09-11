@@ -63,7 +63,3 @@ cover/
 # Translations
 *.mo
 *.pot
-
-*.rs
-t.py
-meta.json
