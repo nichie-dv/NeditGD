@@ -398,6 +398,7 @@ class ColorIDs(Enum):
     P2 = 1006
     G2 = 1009
     BLACK = 1010
+    WHITE = 1011
     MG = 1013
     MG2 = 1014
 

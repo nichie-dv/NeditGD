@@ -14,7 +14,7 @@ OBJECTS = {}
 for x in range(50):
     obj = Object(id = 211)
 
-    obj.color_1 = ColorIDs.BLACK
+    obj.color_1 = ColorIDs.WHITE
     obj.color_1_hsv_enabled = True
     obj.color_1_hsv = rgb_to_hsvstring(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
 
