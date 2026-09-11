@@ -6,7 +6,11 @@
 
 ## Installation
 
- This fork can only be installed manually; add to project path.
+ This fork may be installed manually at the moment. run `pip install .` in the root folder, or you can attempt to run the [refresh script](refresh.bat) to clean install.
+
+## Examples
+
+ A few example scripts can be found in the [Examples](NeditGD/Examples/)
 
 ## TODO
 - Particles
@@ -17,7 +21,7 @@
 
 ### Object Classes
 
-In this version, a variety of Object classes are generated using data from [this website](https://flowvix.github.io/gd-info-explorer/props). You can run the various Generator scripts to generate new classes and enums from the data downloaded here if it updates. Under `Dictionaries/ObjectClasses.py`, there are a whole bunch of new classes for objects, that contain properties that those objects have in game, instead of just using property keys and guessing the name.
+In this version, a variety of Object classes are generated using data from [this website](https://flowvix.github.io/gd-info-explorer/props). You can run the various Generator scripts to generate new classes and enums from the data downloaded here if it updates. Under [ObjectClasses.py](Dictionaries/ObjectClasses.py), there are a whole bunch of new classes for objects, that contain properties that those objects have in game, instead of just using property keys and guessing the name.
 
 In Geometry Dash, multiple keys are reused depending on the object, which makes having a static list define all of their names impractical. By using my generated classes, you don't have to cross reference to make sure the properties are correct. If a specific object type is not used, use `Object`, which is the base class for all objects. Below is an example:
 
@@ -116,6 +120,10 @@ editor.add_object(
 # Make all the necessary changes (add/delete objects)
 editor.save_changes()
 ```
+
+ A benefit of using savefile is that you may use the guideline string to store data. An example can be found in [Examples](NeditGD/Examples/header.py)
+
+
 
 ## Special group 9999
 
